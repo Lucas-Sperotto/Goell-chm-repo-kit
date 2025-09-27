@@ -1,3 +1,16 @@
+# build artifacts
+/build/
+/build/**
+*.o
+*.obj
+*.exe
+*.out
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
 # Prerequisites
 *.d
 
