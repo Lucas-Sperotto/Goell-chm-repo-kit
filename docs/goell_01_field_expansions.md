@@ -34,36 +34,21 @@ $$
 Paper eqs. (1a)-(1d):
 
 $$
-E_{zi} =
-\sum_{n=0}^{\infty}
-a_n J_n(hr)\,\sin(n\theta + \phi_n)\,
-\exp[i(k_z z - \omega t)],
+E_{z1} = \sum_{n=0}^{\infty} a_n J_n(hr) \sin(n\theta + \phi_n) \exp[i(k_z z - \omega t)],
 $$
 
 $$
-H_{zi} =
-\sum_{n=0}^{\infty}
-b_n J_n(hr)\,\sin(n\theta + \psi_n)\,
-\exp\!\left[i(k_z z - \omega t)\right],
-\tag{1b}
+H_{z1} = \sum_{n=0}^{\infty} b_n J_n(hr) \sin(n\theta + \psi_n)  \exp[i(k_z z - \omega t)],
 $$
 
 inside the core, and
 
 $$
-E_{zo} =
-\sum_{n=0}^{\infty}
-c_n K_n(pr)\,\sin(n\theta + \phi_n)\,
-\exp\!\left[i(k_z z - \omega t)\right],
-\tag{1c}
+E_{z0} = \sum_{n=0}^{\infty} c_n K_n(pr) \sin(n\theta + \phi_n) \exp[i(k_z z - \omega t)],
 $$
 
 $$
-H_{zo} =
-\sum_{n=0}^{\infty}
-d_n K_n(pr)\,\sin(n\theta + \psi_n)\,
-\exp\!\left[i(k_z z - \omega t)\right],
-\tag{1d}
+H_{z0} = \sum_{n=0}^{\infty} d_n K_n(pr) \sin(n\theta + \psi_n) \exp[i(k_z z - \omega t)],
 $$
 
 outside the core.
@@ -73,13 +58,11 @@ outside the core.
 Paper eqs. (2a)-(2b):
 
 $$
-h = \left(k_1^2 - k_z^2\right)^{1/2},
-\tag{2a}
+h = (k_1^2 - k_z^2)^{1/2},
 $$
 
 $$
-p = \left(k_z^2 - k_0^2\right)^{1/2},
-\tag{2b}
+p = (k_z^2 - k_0^2)^{1/2},
 $$
 
 with
@@ -95,52 +78,19 @@ $$
 Paper eqs. (3a)-(3d), where `k` can be either `k_1` or `k_0` depending on the region:
 
 $$
-E_r =
-\frac{i k_z}{k^2 - k_z^2}
-\left[
-\frac{\partial E_z}{\partial r}
-+
-\frac{\mu_0 \omega}{k_z r}
-\frac{\partial H_z}{\partial \theta}
-\right],
-\tag{3a}
+E_r = \frac{i k_z}{k^2 - k_z^2} [\frac{\partial E_z}{\partial r} + \frac{\mu_0 \omega}{k_z r} \frac{\partial H_z}{\partial \theta}],
 $$
 
 $$
-E_{\theta} =
-\frac{i k_z}{k^2 - k_z^2}
-\left[
-\frac{1}{r}\frac{\partial E_z}{\partial \theta}
--
-\frac{\mu_0 \omega}{k_z}
-\frac{\partial H_z}{\partial r}
-\right],
-\tag{3b}
+E_{\theta} = \frac{i k_z}{k^2 - k_z^2} [\frac{1}{r}\frac{\partial E_z}{\partial \theta} - \frac{\mu_0 \omega}{k_z} \frac{\partial H_z} {\partial r}],
 $$
 
 $$
-H_r =
-\frac{i k_z}{k^2 - k_z^2}
-\left[
--
-\frac{k^2}{\mu_0 \omega k_z r}
-\frac{\partial E_z}{\partial \theta}
-+
-\frac{\partial H_z}{\partial r}
-\right],
-\tag{3c}
+H_r = \frac{i k_z}{k^2 - k_z^2} [ - \frac{k^2}{\mu_0 \omega k_z r} \frac{\partial E_z}{\partial \theta} + \frac{\partial H_z}{\partial r}],
 $$
 
 $$
-H_{\theta} =
-\frac{i k_z}{k^2 - k_z^2}
-\left[
-\frac{k^2}{\mu_0 \omega k_z}
-\frac{\partial E_z}{\partial r}
-+
-\frac{1}{r}\frac{\partial H_z}{\partial \theta}
-\right].
-\tag{3d}
+H_{\theta} = \frac{i k_z}{k^2 - k_z^2} [ \frac{k^2}{\mu_0 \omega k_z} \frac{\partial E_z}{\partial r} + \frac{1}{r}\frac{\partial H_z} {\partial \theta}].
 $$
 
 ## Tangential Field On The Rectangle Boundary
@@ -155,7 +105,6 @@ E_t = \pm\left(E_r \sin\theta + E_{\theta}\cos\theta\right),
 -\theta_c < \theta < \theta_c,
 \qquad
 \pi-\theta_c < \theta < \pi+\theta_c,
-\tag{4a}
 $$
 
 and on the horizontal sides,
@@ -166,7 +115,6 @@ E_t = \pm\left(-E_r \cos\theta + E_{\theta}\sin\theta\right),
 \theta_c < \theta < \pi-\theta_c,
 \qquad
 \pi+\theta_c < \theta < 2\pi-\theta_c.
-\tag{4b}
 $$
 
 The paper states that similar expressions exist for the tangential magnetic field.
