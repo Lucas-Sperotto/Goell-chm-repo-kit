@@ -1,24 +1,24 @@
-# Goell 1969 - Review Checklist For PDF Cross-Check
+# Goell 1969 - Checklist De Revisao Cruzada Com O PDF
 
-This file is intentionally short and is meant to be used side-by-side with the rendered equations in:
+Este arquivo e curto de proposito. A ideia e usalo lado a lado com as equacoes renderizadas em:
 
 - [goell_01_field_expansions.md](./goell_01_field_expansions.md)
 - [goell_02_matrix_and_normalization.md](./goell_02_matrix_and_normalization.md)
 
-## High-Priority Items To Verify Against The Scan
+## Itens Prioritarios Para Conferencia No Scan
 
-1. Confirm the exact glyph used for the vertical plotting variable in eq. (11) and on the y-axis of Figs. 16-22.
-   In the repo we have been calling this `Pprime`, but the scan may really correspond to `P^2`.
+1. Confirmar o glifo exato usado para a variavel vertical da eq. (11) e para o eixo vertical das Figs. 16-22.
+   No repositorio ela aparece como `Pprime`, mas nas notas foi nomeada como `P^2_paper`.
 
-2. Confirm the exact glyph used for the horizontal plotting variable in eq. (16) and on the x-axis of Figs. 16-22.
-   In the repo we have been calling this `B`, but the scan glyph can look like beta or a stylized capital B.
+2. Confirmar o glifo exato usado para a variavel horizontal da eq. (16) e para o eixo horizontal das Figs. 16-22.
+   No repositorio ela aparece como `B`, mas o scan pode se parecer com beta ou com um `B` estilizado.
 
-3. Confirm the phase-family statement in Section 2.1:
+3. Confirmar a afirmacao da Secao 2.1 sobre as familias de fase:
 
-   - first type: `\phi_n = 0`, `\psi_n = \pi/2`
-   - second type: `\phi_n = \pi/2`, `\psi_n = \pi`
+   - primeiro tipo: `\phi_n = 0`, `\psi_n = \pi/2`
+   - segundo tipo: `\phi_n = \pi/2`, `\psi_n = \pi`
 
-4. Confirm that the `S` and `C` definitions on page 2140 really use the same `\phi` parameter for both:
+4. Confirmar se as definicoes de `S` e `C` na p. 2140 usam mesmo o mesmo parametro `\phi` para ambas:
 
    $$
    S = \sin(n\theta_m + \phi),
@@ -28,14 +28,14 @@ This file is intentionally short and is meant to be used side-by-side with the r
    \phi = 0 \ \text{or} \ \pi/2.
    $$
 
-5. Confirm the signs in eqs. (7e)-(7l), especially:
+5. Confirmar os sinais em `(7e)`-(`7l`), especialmente:
 
-   - the leading minus sign in `(7e)`
-   - the `k_0 Z_0` factor in `(7f)` and `(7h)`
-   - the `\epsilon_r k_0 / Z_0` factor in `(7i)`
-   - the leading minus sign in `(7k)`
+   - o sinal de menos na frente de `(7e)`
+   - o fator `k_0 Z_0` em `(7f)` e `(7h)`
+   - o fator `\epsilon_r k_0 / Z_0` em `(7i)`
+   - o sinal de menos na frente de `(7k)`
 
-6. Confirm the definitions of the angular factors:
+6. Confirmar as definicoes dos fatores angulares:
 
    $$
    \bar J = \frac{n J_n(h r_m)}{h^2 r_m},
@@ -43,29 +43,29 @@ This file is intentionally short and is meant to be used side-by-side with the r
    \bar K = \frac{n K_n(p r_m)}{p^2 r_m}.
    $$
 
-7. Confirm the piecewise geometry factors:
+7. Confirmar os fatores geometricos por trechos:
 
-   - for `\theta < \theta_c`:
-     `R = \sin\theta_m`, `T = \cos\theta_m`, `r_m = (a/2)\sec\theta_m`
-   - for `\theta > \theta_c`:
-     `R = -\cos\theta_m`, `T = \sin\theta_m`, `r_m = (b/2)\csc\theta_m`
+   - para `\theta < \theta_c`:
+     `R = \sin\theta_m`, `T = \cos\theta_m`, `r_m = (a/2)\cos\theta_m`
+   - para `\theta > \theta_c`:
+     `R = -\cos\theta_m`, `T = \sin\theta_m`, `r_m = (b/2)\sin\theta_m`
 
-8. Confirm the special rule in Section 2.2 for even harmonics and `a/b \neq 1`:
+8. Confirmar a regra especial da Secao 2.2 para harmonicos pares quando `a/b \neq 1`:
 
-   - all points follow the first formula,
-   - except the first and last points for the odd `z` component, which are omitted.
+   - todos os pontos seguem a primeira formula,
+   - exceto os primeiros e ultimos pontos do componente `z` impar, que sao omitidos.
 
-9. Confirm the exact block structure of `Q` in eq. (18), especially the minus signs in the third and fourth block rows.
+9. Confirmar a estrutura em blocos de `Q` na eq. (18), especialmente os sinais de menos na terceira e quarta linhas de blocos.
 
-10. Confirm the scaling formulas on page 2144.
-    Those OCR lines are the least trustworthy part of the extraction.
+10. Confirmar as formulas de escalonamento da p. 2144.
+    Este continua sendo o trecho menos confiavel da extracao.
 
-## What I Expect You To Mark Up
+## Como Usar Este Checklist
 
-If you want, the easiest review loop is:
+Se voltarmos a revisar o PDF no futuro, o loop mais simples e:
 
-- mark anything that is symbolically wrong,
-- mark anything that is numerically equivalent but not written exactly as in the paper,
-- mark anything whose glyph naming should be changed to match the article.
+- marcar qualquer item simbolicamente errado;
+- marcar qualquer item numericamente equivalente, mas escrito de forma diferente do artigo;
+- marcar qualquer glifo cujo nome deva mudar para bater com o paper.
 
-After your pass, I can use your corrections to tighten both the documentation and the solver implementation.
+Depois dessa passada, o proximo ajuste natural e levar a versao final das equacoes para dentro do solver e dos scripts de plot.

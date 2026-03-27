@@ -18,6 +18,8 @@ MARKER_CYCLE = ["o", "s", "^", "x", "d", "."]
 
 
 def load_rows(path, pmin=0.0, merit_max=None):
+    # Cada CSV representa uma das quatro classes do paper:
+    # odd/phi0, odd/phi90, even/phi0 e even/phi90.
     rows = []
     with open(path, newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
@@ -73,6 +75,8 @@ def plot_dataset(ax, path, index, scatter=False, pmin=0.0, merit_max=None):
 
     label = infer_label(path, rows)
     if scatter:
+        # No modo scatter mostramos todos os minimos locais exportados pelo solver,
+        # sem tentar costurar ramos modais entre valores consecutivos de B.
         marker = MARKER_CYCLE[index % len(MARKER_CYCLE)]
         ax.plot(
             [row["B"] for row in rows],
@@ -107,7 +111,7 @@ def parse_args():
     parser.add_argument("csvs", nargs="*", default=DEFAULT_CSVS)
     parser.add_argument(
         "--title",
-        default="Goell CHM — propagation curves",
+        default="Goell CHM - curvas de propagacao",
     )
     parser.add_argument("--save", help="Salva a figura em vez de abrir na tela.")
     parser.add_argument("--scatter", action="store_true", help="Plota todos os pontos sem ligar ramos.")
@@ -134,8 +138,8 @@ if __name__ == "__main__":
 
     ax.set_xlim(0, args.xmax)
     ax.set_ylim(0, args.ymax)
-    ax.set_xlabel("Omega")
-    ax.set_ylabel("rho^2 = P'")
+    ax.set_xlabel("B")
+    ax.set_ylabel("Pprime")
     ax.grid(True, alpha=0.3)
 
     handles, labels = ax.get_legend_handles_labels()

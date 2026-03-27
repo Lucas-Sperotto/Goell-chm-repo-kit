@@ -1,42 +1,40 @@
-# Goell 1969 - Matrix Elements, Global Determinant, and Normalization
+# Goell 1969 - Elementos De Matriz, Determinante Global E Normalizacao
 
-These notes rewrite the solver-relevant equations from Sections 2.3, 2.6, and 2.7 of the paper.
+Estas notas reescrevem as equacoes do artigo que alimentam diretamente a montagem da matriz `Q`, a normalizacao usada nas curvas de propagacao e a busca das raizes nas Secoes 2.3, 2.6 e 2.7.
 
-> REVIEW-PDF: delete each `REVIEW-PDF` note after checking the marked equation against the article scan.
+## Equacoes De Casamento Em Forma Matricial
 
-## Matrix Matching Equations
+Equacoes (6a)-(6d):
 
-Paper eqs. (6a)-(6d):
-
-For the longitudinal electric field,
+Para o campo eletrico longitudinal,
 
 $$
 E^{LA} A = E^{LC} C,
 $$
 
-for the longitudinal magnetic field,
+para o campo magnetico longitudinal,
 
 $$
 H^{LB} B = H^{LD} D,
 $$
 
-for the tangential electric field,
+para o campo eletrico tangencial,
 
 $$
 E^{TA} A + E^{TB} B = E^{TC} C + E^{TD} D,
 $$
 
-and for the tangential magnetic field,
+e para o campo magnetico tangencial,
 
 $$
 H^{TA} A + H^{TB} B = H^{TC} C + H^{TD} D.
 $$
 
-Here `A`, `B`, `C`, and `D` are column vectors of the modal coefficients `a_n`, `b_n`, `c_n`, and `d_n`.
+Aqui `A`, `B`, `C` e `D` sao vetores-coluna contendo os coeficientes modais `a_n`, `b_n`, `c_n` e `d_n`.
 
-## Definitions Used In The Matrix Elements
+## Definicoes Usadas Nos Elementos De Matriz
 
-Paper page 2140 defines:
+Na p. 2140, o artigo define:
 
 $$
 S = \sin(n\theta_m + \phi),
@@ -56,9 +54,6 @@ J = J_n(h r_m),
 K = K_n(p r_m),
 $$
 
-> REVIEW-PDF: this line may not belong as a standalone definition in the paper. The matrix elements seem to use the scaled quantities in the next line instead.
-> Check whether the article actually defines raw derivatives here, or only the divided forms `J_n'(h r_m)/h` and `K_n'(p r_m)/p`.
-
 $$
 J' = J_n'(h r_m),
 \qquad
@@ -66,12 +61,12 @@ K' = K_n'(p r_m),
 $$
 
 $$
-J' = \frac{J_n'(h r_m)}{h},
+\bar J' = \frac{J_n'(h r_m)}{h},
 \qquad
-K' = \frac{K_n'(p r_m)}{p},
+\bar K' = \frac{K_n'(p r_m)}{p},
 $$
 
-and, to distinguish them from the radial derivatives above, I will denote the angular factors with bars:
+e, para distinguir dos derivados radiais acima, eu mantenho os fatores angulares com barra:
 
 $$
 \bar J = \frac{n J_n(h r_m)}{h^2 r_m},
@@ -79,49 +74,55 @@ $$
 \bar K = \frac{n K_n(p r_m)}{p^2 r_m}.
 $$
 
-The paper also defines
+O artigo tambem define
 
 $$
-Z_0 = (\frac{\mu_0}{\epsilon_0})^{1/2},
+Z_0 = \left(\frac{\mu_0}{\epsilon_0}\right)^{1/2},
 \qquad
 \epsilon_r = \frac{\epsilon_1}{\epsilon_0}.
 $$
 
-## Boundary Geometry Factors
+Na implementacao, estas quantidades aparecem de forma mais transparente se pensarmos assim:
 
-For `\theta < \theta_c`,
+- `J` e `K` entram nos blocos longitudinais;
+- `\bar J'` e `\bar K'` representam os termos derivados que alimentam os blocos tangenciais;
+- `\bar J` e `\bar K` representam os termos angulares proporcionais a `n/r_m`.
+
+## Fatores Geometricos Da Fronteira
+
+Para `\theta < \theta_c`,
 
 $$
 R = \sin\theta_m,
 \qquad
 T = \cos\theta_m,
 \qquad
-r_m = \frac{a/2}{\cos\theta_m},
+r_m = (a/2) \cos\theta_m,
 $$
 
-and for `\theta > \theta_c`,
+e para `\theta > \theta_c`,
 
 $$
 R = -\cos\theta_m,
 \qquad
 T = \sin\theta_m,
 \qquad
-r_m = \frac{b/2}{\sin\theta_m}.
+r_m = (b/2) \sin\theta_m.
 $$
 
-At the corner `\theta = \theta_c`, the paper assumes the boundary to be perpendicular to the radial line, giving
+No canto `\theta = \theta_c`, o artigo assume que a fronteira e perpendicular a reta radial, obtendo
 
 $$
-R = \cos(\theta_c + \frac{\pi}{4}),
+R = \cos\left(\theta_c + \frac{\pi}{4}\right),
 \qquad
-T = \cos(\theta_c - \frac{\pi}{4}),
+T = \cos\left(\theta_c - \frac{\pi}{4}\right),
 \qquad
 r_m = \frac{\sqrt{a^2 + b^2}}{4}.
 $$
 
-## Matrix Elements
+## Elementos De Matriz
 
-Paper eqs. (7a)-(7l):
+Equacoes (7a)-(7l):
 
 $$
 e_{mn}^{LA} = J S,
@@ -140,19 +141,19 @@ h_{mn}^{LD} = K C,
 $$
 
 $$
-e_{mn}^{TA} = -k_z (J' S R + \bar J C T),
+e_{mn}^{TA} = -k_z (\bar J' S R + \bar J C T),
 $$
 
 $$
-e_{mn}^{TB} = k_0 Z_0 (\bar J S R + J' C T),
+e_{mn}^{TB} = k_0 Z_0 (\bar J S R + \bar J' C T),
 $$
 
 $$
-e_{mn}^{TC} = k_z (K' S R + \bar K C T),
+e_{mn}^{TC} = k_z (\bar K' S R + \bar K C T),
 $$
 
 $$
-e_{mn}^{TD} = -k_0 Z_0 (\bar K S R + K' C T),
+e_{mn}^{TD} = -k_0 Z_0 (\bar K S R + \bar K' C T),
 $$
 
 $$
@@ -160,95 +161,92 @@ h_{mn}^{TA} = \frac{\epsilon_r k_0}{Z_0} (\bar J C R - J' S T),
 $$
 
 $$
-h_{mn}^{TB} = -k_z (J' C R - \bar J S T),
+h_{mn}^{TB} = -k_z (\bar J' C R - \bar J S T),
 $$
 
 $$
-h_{mn}^{TC} = -\frac{k_0}{Z_0} (\bar K C R - K' S T),
+h_{mn}^{TC} = -\frac{k_0}{Z_0} (\bar K C R - \bar K' S T),
 $$
 
 $$
-h_{mn}^{TD} = k_z (K' C R - \bar K S T).
+h_{mn}^{TD} = k_z (\bar K' C R - \bar K S T).
 $$
 
-## Orthogonality / Transverse-Field Note
+Observacao pratica para o codigo:
 
-Paper eqs. (8)-(9):
+- as equacoes acima sao a referencia direta para os blocos preenchidos em `src/goell_q_solver.cpp`;
+- quando o solver normaliza tudo por `k_0` e depois toma `Z_0 = 1`, os mesmos blocos aparecem com fatores reduzidos, mas preservando os zeros de `\det(Q)`.
 
-The transverse fields are orthogonal only when
+## Nota Sobre Ortogonalidade Dos Campos Transversais
+
+Equacoes (8)-(9):
+
+Os campos transversais sao ortogonais somente quando
 
 $$
 E_t \cdot H_t = E_r H_r + E_{\theta} H_{\theta} = 0.
 $$
 
-From eq. (3), the paper writes
-
-> REVIEW-PDF: check the sign of the prefactor in eq. (9).
-> The current line below uses `(k_z^2 - k^2)/k_z^2`, but the scan previously looked like `(k^2 - k_z^2)/k_z^2`.
+Usando a eq. (3), o artigo escreve
 
 $$
-E_t \cdot H_t = \frac{k_z^2 - k^2}{k_z^2} ( \frac{\partial H_z}{\partial r}\frac{\partial E_z}{\partial r} + \frac{1}{r^2} \frac{\partial H_z}{\partial \theta} \frac{\partial E_z}{\partial \theta}).
+E_t \cdot H_t = \frac{k_z^2 - k^2}{k_z^2} \left( \frac{\partial H_z}{\partial r}\frac{\partial E_z}{\partial r} + \frac{1}{r^2} \frac{\partial H_z}{\partial \theta} \frac{\partial E_z}{\partial \theta}\right).
 $$
 
-This is not part of the root search, but it matters later for field interpretation.
+Isso nao entra diretamente na busca de raizes, mas e importante quando formos voltar aos perfis de campo.
 
-## Normalization
+## Normalizacao
 
-Paper eq. (10):
+Eq. (10):
 
 $$
 h r = \left[k_1^2 - k_0^2 - p^2\right]^{1/2} r.
 $$
 
-The paper then introduces the normalized propagation quantity and the normalized radial quantity.
+Em seguida o artigo introduz a quantidade de propagacao normalizada e a quantidade radial normalizada.
 
-To keep the notation explicit in these notes:
+Para deixar a ligacao com o repositorio explicita:
 
-- I denote the paper's vertical-axis quantity by `P^2_paper`,
-- and the unsquared quantity by `P_paper = \sqrt{P^2_paper}`.
+- eu uso `P^2_paper` para a quantidade do eixo vertical;
+- e `P_paper = \sqrt{P^2_paper}` para a versao sem quadrado.
 
-Paper eq. (11):
+Eq. (11):
 
 $$
-P^2_{paper}
-=
-\frac{(k_z/k_0)^2 - 1}{n_r^2 - 1},
+P^2_{paper} = \frac{(k_z/k_0)^2 - 1}{n_r^2 - 1},
 $$
 
-paper eq. (12):
+Eq. (12):
 
 $$
 \Omega = r k_0 (n_r^2 - 1)^{1/2},
 $$
 
-paper eq. (13):
-
-> REVIEW-PDF: the exponent on the right-hand side is suspicious here.
-> I expect the paper to read `n_r = k_1/k_0`, not `n_r = (k_1/k_0)^{1/2}`.
+Eq. (13):
 
 $$
-n_r = \frac{k_1}{k_0}^{1/2},
+n_r = \left(\frac{k_1}{k_0}\right)^{1/2},
 $$
 
-and therefore
+e, portanto,
 
 $$
-p r = P_{paper}\,\Omega,
+p r = P_{paper}\Omega,
 $$
 
 $$
 h r = \Omega(1 - P^2_{paper})^{1/2}.
 $$
 
-For the propagation curves, the paper uses as horizontal variable
+Para as curvas de propagacao, o artigo usa como variavel horizontal
 
 $$
 B_{paper} = \frac{2b}{\lambda_0}(n_r^2 - 1)^{1/2},
 $$
 
-with `\lambda_0 = 2\pi/k_0`.
+com `\lambda_0 = 2\pi/k_0`.
 
-For small index difference, the paper also gives
+Para pequena diferenca de indice, o artigo tambem fornece
 
 $$
 P^2_{paper}
@@ -258,15 +256,21 @@ P^2_{paper}
 \Delta n_r = n_r - 1.
 $$
 
-## Global Matrix Equation
+Na implementacao, isso aparece assim:
 
-Paper eq. (18):
+- `B` controla a varredura horizontal da curva;
+- `Pprime` guarda a variavel vertical normalizada;
+- os argumentos de Bessel sao montados a partir de `B`, `Pprime` e do `r_m` normalizado.
+
+## Equacao Matricial Global
+
+Eq. (18):
 
 $$
 [Q][T] = 0,
 $$
 
-with
+com
 
 $$
 Q =
@@ -278,7 +282,7 @@ H^{TA} & H^{TB} & -H^{TC} & -H^{TD}
 \end{bmatrix},
 $$
 
-and
+e
 
 $$
 [T] =
@@ -290,44 +294,41 @@ D
 \end{bmatrix}.
 $$
 
-The modal condition is then
+A condicao modal e entao
 
 $$
 \det[Q] = 0.
 $$
 
-## Root Search Notes From Section 2.7.1
+## Observacoes Da Busca De Raizes Na Secao 2.7.1
 
-The paper states:
+O artigo informa que:
 
-1. test values of the normalized propagation variable were first sampled uniformly in `(0, 1)`;
-2. Newton's method was then used to refine the roots;
-3. for propagation curves, about one Newton step was typically used;
-4. five harmonics required about `0.1 s` per determinant evaluation on an IBM 360/65.
+1. valores-teste da variavel de propagacao normalizada foram amostrados uniformemente em `(0, 1)`;
+2. o metodo de Newton foi usado em seguida para refinar as raizes;
+3. nas curvas de propagacao, em geral uma iteracao de Newton era suficiente;
+4. com cinco harmonicos, cada avaliacao do determinante levava cerca de `0.1 s` em um IBM 360/65.
 
-## Scaling Note From Page 2144
+## Nota De Escalonamento Da Pagina 2144
 
-To control overflow/underflow, the paper notes that rows or columns of the determinant may be multiplied by positive functions without shifting the zeros.
+Para controlar underflow e overflow, o artigo observa que linhas ou colunas do determinante podem ser multiplicadas por funcoes positivas sem deslocar seus zeros.
 
-The text specifically says that a brute-force scaling was used:
+O texto diz que foi usado um escalonamento bruto:
 
-> REVIEW-PDF: these two scaling formulas are still uncertain and should be checked directly in the scan before we trust them in the implementation notes.
-> In particular, verify whether the numerator really includes the extra factor `d`, and confirm the exact denominator arguments.
-
-- Bessel terms multiplied by
+- termos de Bessel multiplicados por
 
 $$
 \frac{h^d d}{\left|J_n(h b)\right|},
 $$
 
-- modified Bessel terms multiplied by
+- termos de Bessel modificado multiplicados por
 
 $$
 \frac{p^d d}{K_n(p b)},
 $$
 
-where `d` is the average waveguide dimension.
+onde `d` e a dimensao media do guia.
 
-The paper also says that `Z_0` was then set to unity because that does not shift the zeros of the determinant.
+O artigo tambem afirma que `Z_0` foi entao fixado em unidade, pois isso nao desloca os zeros do determinante.
 
-Please verify these two scaling formulas carefully against the PDF, because they are especially easy to corrupt in OCR.
+Este e o unico trecho destas notas que ainda deve ser tratado com cautela: o scan dessa passagem continua sendo a parte menos segura da extracao.

@@ -47,13 +47,13 @@ esac
 figure_defaults() {
   case "$1" in
     fig16)
-      printf '%s\n' "1" "1.01" "Fig. 16 — unity aspect ratio, vanishing index difference"
+      printf '%s\n' "1" "1.01" "Fig. 16 — razao de aspecto unitaria, diferenca de indice tendendo a zero"
       ;;
     fig17)
-      printf '%s\n' "2" "1.01" "Fig. 17 — a/b = 2, vanishing index difference"
+      printf '%s\n' "2" "1.01" "Fig. 17 — a/b = 2, diferenca de indice tendendo a zero"
       ;;
     fig18)
-      printf '%s\n' "1" "1.5" "Fig. 18 — unity aspect ratio, Delta n_r = 0.5"
+      printf '%s\n' "1" "1.5" "Fig. 18 — razao de aspecto unitaria, Delta n_r = 0.5"
       ;;
     fig19)
       printf '%s\n' "2" "1.5" "Fig. 19 — a/b = 2, Delta n_r = 0.5"
@@ -149,7 +149,7 @@ fi
   "$ODD_PHI90_CSV" \
   "$EVEN_PHI0_CSV" \
   "$EVEN_PHI90_CSV" \
-  --title "Goell CHM — $TITLE" \
+  --title "Goell CHM - $TITLE" \
   "${plot_args[@]}" \
   --pmin 0.001 \
   --save "$PLOT_FILE"

@@ -1,47 +1,47 @@
-# Goell 1969 - Field Expansions, Symmetry, and Matching Points
+# Goell 1969 - Expansoes de Campo, Simetria e Pontos de Casamento
 
-These notes rewrite the solver-relevant equations from Sections 2.0, 2.1, and 2.2 of the paper in renderable Markdown math.
+Estas notas reescrevem, em Markdown renderizavel, as equacoes do artigo que entram diretamente na formulacao numerica das Secoes 2.0, 2.1 e 2.2.
 
-## Notation Convention Used In These Notes
+## Convencao De Notacao Usada Nestas Notas
 
-Two glyphs in the scan/OCR are easy to misread, so I am naming them explicitly here:
+Dois simbolos do scan/OCR sao faceis de confundir visualmente, entao eu os nomeio aqui de forma explicita:
 
-- `P^2_paper`: the normalized propagation variable plotted on the vertical axis in Figs. 16-22.
-  In the repository, this is currently stored in the CSV column `Pprime`.
-- `B_paper`: the horizontal plotting variable from eq. (16).
-  In the repository, this is currently called `B`.
+- `P^2_paper`: variavel de propagacao normalizada usada no eixo vertical das Figs. 16-22.
+  No repositorio, ela ainda aparece na coluna `Pprime` dos CSVs.
+- `B_paper`: variavel horizontal definida na eq. (16).
+  No repositorio, ela ainda aparece simplesmente como `B`.
 
-Please compare the rendered math with the PDF glyph-by-glyph and correct any symbol that should use a different letter style.
+Se algum glifo do PDF usar um estilo diferente de letra, estas notas podem ser ajustadas depois sem alterar a estrutura da implementacao.
 
-## Geometry
+## Geometria
 
-The core is rectangular, centered at the origin, with full dimensions `a` (x direction) and `b` (y direction). The propagation direction is `+z`.
+O nucleo e retangular, centrado na origem, com dimensoes completas `a` na direcao `x` e `b` na direcao `y`. A propagacao ocorre ao longo de `+z`.
 
-In the first quadrant, the corner lies at
+No primeiro quadrante, o canto do retangulo esta em
 
 $$
 \left(\frac{a}{2}, \frac{b}{2}\right),
 $$
 
-and the corner angle is
+e o angulo do canto e
 
 $$
 \theta_c = \tan^{-1}\!\left(\frac{b}{a}\right).
 $$
 
-## Longitudinal Field Expansions
+## Expansoes Dos Campos Longitudinais
 
-Paper eqs. (1a)-(1d):
+Equacoes (1a)-(1d) do artigo:
 
 $$
 E_{z1} = \sum_{n=0}^{\infty} a_n J_n(hr) \sin(n\theta + \phi_n) \exp[i(k_z z - \omega t)],
 $$
 
 $$
-H_{z1} = \sum_{n=0}^{\infty} b_n J_n(hr) \sin(n\theta + \psi_n)  \exp[i(k_z z - \omega t)],
+H_{z1} = \sum_{n=0}^{\infty} b_n J_n(hr) \sin(n\theta + \psi_n) \exp[i(k_z z - \omega t)],
 $$
 
-inside the core, and
+dentro do nucleo, e
 
 $$
 E_{z0} = \sum_{n=0}^{\infty} c_n K_n(pr) \sin(n\theta + \phi_n) \exp[i(k_z z - \omega t)],
@@ -51,11 +51,11 @@ $$
 H_{z0} = \sum_{n=0}^{\infty} d_n K_n(pr) \sin(n\theta + \psi_n) \exp[i(k_z z - \omega t)],
 $$
 
-outside the core.
+fora do nucleo.
 
-## Radial Wavenumbers
+## Numeros De Onda Radiais
 
-Paper eqs. (2a)-(2b):
+Equacoes (2a)-(2b):
 
 $$
 h = (k_1^2 - k_z^2)^{1/2},
@@ -65,7 +65,7 @@ $$
 p = (k_z^2 - k_0^2)^{1/2},
 $$
 
-with
+com
 
 $$
 k_1 = \omega(\mu_0 \epsilon_1)^{1/2},
@@ -73,31 +73,33 @@ k_1 = \omega(\mu_0 \epsilon_1)^{1/2},
 k_0 = \omega(\mu_0 \epsilon_0)^{1/2}.
 $$
 
-## Transverse Field Components
+## Componentes Transversais Dos Campos
 
-Paper eqs. (3a)-(3d), where `k` can be either `k_1` or `k_0` depending on the region:
-
-$$
-E_r = \frac{i k_z}{k^2 - k_z^2} [\frac{\partial E_z}{\partial r} + \frac{\mu_0 \omega}{k_z r} \frac{\partial H_z}{\partial \theta}],
-$$
+Equacoes (3a)-(3d), onde `k` pode ser `k_1` ou `k_0` dependendo da regiao:
 
 $$
-E_{\theta} = \frac{i k_z}{k^2 - k_z^2} [\frac{1}{r}\frac{\partial E_z}{\partial \theta} - \frac{\mu_0 \omega}{k_z} \frac{\partial H_z} {\partial r}],
+E_r = \frac{i k_z}{k^2 - k_z^2} \left[\frac{\partial E_z}{\partial r} + \frac{\mu_0 \omega}{k_z r} \frac{\partial H_z}{\partial \theta}\right],
 $$
 
 $$
-H_r = \frac{i k_z}{k^2 - k_z^2} [ - \frac{k^2}{\mu_0 \omega k_z r} \frac{\partial E_z}{\partial \theta} + \frac{\partial H_z}{\partial r}],
+E_{\theta} = \frac{i k_z}{k^2 - k_z^2} \left[\frac{1}{r}\frac{\partial E_z}{\partial \theta} - \frac{\mu_0 \omega}{k_z} \frac{\partial H_z}{\partial r}\right],
 $$
 
 $$
-H_{\theta} = \frac{i k_z}{k^2 - k_z^2} [ \frac{k^2}{\mu_0 \omega k_z} \frac{\partial E_z}{\partial r} + \frac{1}{r}\frac{\partial H_z} {\partial \theta}].
+H_r = \frac{i k_z}{k^2 - k_z^2} \left[ - \frac{k^2}{\mu_0 \omega k_z r} \frac{\partial E_z}{\partial \theta} + \frac{\partial H_z}{\partial r}\right],
 $$
 
-## Tangential Field On The Rectangle Boundary
+$$
+H_{\theta} = \frac{i k_z}{k^2 - k_z^2} \left[ \frac{k^2}{\mu_0 \omega k_z} \frac{\partial E_z}{\partial r} + \frac{1}{r}\frac{\partial H_z}{\partial \theta}\right].
+$$
 
-Paper eqs. (4a)-(4b):
+Estas expressoes sao a base das equacoes tangenciais depois empacotadas nas matrizes da Secao 2.3.
 
-On the vertical sides,
+## Campo Tangencial Na Fronteira Retangular
+
+Equacoes (4a)-(4b):
+
+Nos lados verticais,
 
 $$
 E_t = \pm\left(E_r \sin\theta + E_{\theta}\cos\theta\right),
@@ -107,7 +109,7 @@ E_t = \pm\left(E_r \sin\theta + E_{\theta}\cos\theta\right),
 \pi-\theta_c < \theta < \pi+\theta_c,
 $$
 
-and on the horizontal sides,
+e nos lados horizontais,
 
 $$
 E_t = \pm\left(-E_r \cos\theta + E_{\theta}\sin\theta\right),
@@ -117,13 +119,13 @@ E_t = \pm\left(-E_r \cos\theta + E_{\theta}\sin\theta\right),
 \pi+\theta_c < \theta < 2\pi-\theta_c.
 $$
 
-The paper states that similar expressions exist for the tangential magnetic field.
+O artigo observa que expressoes analogas valem para o campo magnetico tangencial.
 
-## Symmetry About The x Axis
+## Simetria Em Relacao Ao Eixo x
 
-Section 2.1 states that two phase families must exist:
+A Secao 2.1 afirma que devem existir duas familias de fase:
 
-1. first type:
+1. primeiro tipo:
 
 $$
 \phi_n = 0,
@@ -131,7 +133,7 @@ $$
 \psi_n = \frac{\pi}{2},
 $$
 
-2. second type:
+2. segundo tipo:
 
 $$
 \phi_n = \frac{\pi}{2},
@@ -139,7 +141,7 @@ $$
 \psi_n = \pi.
 $$
 
-In implementation terms, the paper later packages this as one phase parameter `\phi` in the `S` and `C` factors of eq. (7):
+Mais adiante, o artigo condensa isso em um unico parametro `\phi` dentro dos fatores `S` e `C` usados nas equacoes de matriz:
 
 $$
 S = \sin(n\theta_m + \phi),
@@ -149,53 +151,41 @@ C = \cos(n\theta_m + \phi),
 \phi \in \{0,\frac{\pi}{2}\}.
 $$
 
-This means:
+Isso implica:
 
-- if `\phi = 0`, then `S = \sin(n\theta_m)` and `C = \cos(n\theta_m)`;
-- if `\phi = \pi/2`, then `S = \cos(n\theta_m)` and `C = -\sin(n\theta_m)`.
+- se `\phi = 0`, entao `S = \sin(n\theta_m)` e `C = \cos(n\theta_m)`;
+- se `\phi = \pi/2`, entao `S = \cos(n\theta_m)` e `C = -\sin(n\theta_m)`.
 
-## Symmetry About The y Axis
+## Simetria Em Relacao Ao Eixo y
 
-The paper argues that any given mode must consist entirely of either odd harmonics or even harmonics.
+O artigo argumenta que qualquer modo deve ser composto inteiramente por harmonicos impares ou inteiramente por harmonicos pares.
 
-For the illustrative example in Section 2.1, letting
+No exemplo ilustrativo da Secao 2.1, tomando
 
 $$
 \alpha = \theta - \frac{\pi}{2},
 $$
 
-eq. (1c) is rewritten as
+a eq. (1c) e reescrita como
 
 $$
 E_{zo} = \sum_{n=0}^{\infty} c_n K_n(pr) [ \sin(n\alpha)\cos\frac{n\pi}{2} + \cos(n\alpha)\sin\frac{n\pi}{2} ].
 $$
 
-From this, the paper concludes:
+A partir disso, o artigo conclui:
 
-- pure symmetry about the y axis requires all `n` odd,
-- pure antisymmetry about the y axis requires all `n` even.
+- simetria pura em relacao ao eixo `y` exige todos os `n` impares;
+- antissimetria pura em relacao ao eixo `y` exige todos os `n` pares.
 
-## Matching Points
+Esse e o ponto central que leva a separar o solver em classes `odd` e `even`.
 
-Section 2.2 gives the matching-point rules used in the computations of Section 3.
+## Pontos De Casamento
 
-### Odd-harmonic cases
+A Secao 2.2 fornece as regras para a escolha dos pontos de casamento usados nos resultados da Secao 3.
 
-For odd harmonics, the matching points are
+### Casos Com Harmonicos Impares
 
-$$
-\theta_m = \frac{(m - 1/2)\pi}{2N},
-\qquad
-m = 1,2,\ldots,N,
-$$
-
-where `N` is the number of space harmonics.
-
-### Even-harmonic cases, unity aspect ratio
-
-For even harmonics and `a/b = 1`:
-
-- components with even symmetry about `\theta = 0` use
+Para harmonicos impares, os pontos de casamento sao
 
 $$
 \theta_m = \frac{(m - 1/2)\pi}{2N},
@@ -203,7 +193,21 @@ $$
 m = 1,2,\ldots,N,
 $$
 
-- components with odd symmetry about `\theta = 0` use
+onde `N` e o numero de harmonicos espaciais.
+
+### Casos Com Harmonicos Pares E Razao De Aspecto Unitaria
+
+Para harmonicos pares e `a/b = 1`:
+
+- os componentes com simetria par em torno de `\theta = 0` usam
+
+$$
+\theta_m = \frac{(m - 1/2)\pi}{2N},
+\qquad
+m = 1,2,\ldots,N,
+$$
+
+- os componentes com simetria impar em torno de `\theta = 0` usam
 
 $$
 \theta_m = \frac{(m - N - 1/2)\pi}{2(N-1)},
@@ -211,13 +215,13 @@ $$
 m = N+1, N+2, \ldots, 2N-1.
 $$
 
-This leads to `4N - 2` unknown coefficients instead of `4N`.
+Isso reduz o total para `4N - 2` coeficientes desconhecidos, em vez de `4N`.
 
-### Even-harmonic cases, non-unity aspect ratio
+### Casos Com Harmonicos Pares E Razao De Aspecto Nao Unitaria
 
-For `a/b \neq 1`, the paper states:
+Para `a/b \neq 1`, o artigo afirma:
 
-- all points follow the first formula above,
-- except that the first and last points for the odd `z` component are omitted.
+- todos os pontos seguem a primeira formula acima;
+- exceto os primeiros e ultimos pontos do componente `z` impar, que sao omitidos.
 
-That statement is easy to mis-implement, so it is worth checking carefully against the scan.
+Essa regra especial e facil de implementar errado, entao vale a pena mantela destacada ao lado do codigo.

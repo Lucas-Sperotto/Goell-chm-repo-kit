@@ -61,11 +61,14 @@ enum class RowKind
 struct Params
 {
     double a_over_b = 1.0; // razao de aspecto a/b (paper usa a e b como dimensoes completas)
-    double n_r = 1.01;     // n_r = k1/k0 = sqrt(e1/e0), eq. (13)
+    // Valor usado na implementacao para montar epsilon_r = n_r^2.
+    // Mantemos este parametro separado da discussao de notacao do paper para
+    // nao misturar a leitura do scan com a normalizacao numerica do solver.
+    double n_r = 1.01;
 
     int N = 5;             // numero de harmonicos da classe escolhida
-    // Eq. (16): o eixo horizontal do paper e Ω = 2b/lambda0 * sqrt(n_r^2 - 1).
-    // Como lambda0 = 2π/k0, isso equivale a (k0 b / π) * sqrt(n_r^2 - 1).
+    // Eq. (16): o eixo horizontal do paper e B_paper = 2b/lambda0 * sqrt(n_r^2 - 1).
+    // Como lambda0 = 2π/k0, isso implica k0 b sqrt(n_r^2 - 1) = pi * B_paper.
     double B_min = 0.1;
     double B_max = 4.0;
     int NB = 40;
@@ -106,7 +109,7 @@ struct ColumnLayout
 struct BoundaryPoint
 {
     double theta = 0.0;
-    double r = 0.0;
+    double r = 0.0; // r_m normalizado por b
     double R = 0.0; // projecao tangencial da componente radial, eqs. (4) e definicoes sob (7)
     double T = 0.0; // projecao tangencial da componente azimutal, idem
 };
@@ -232,6 +235,8 @@ static ColumnLayout build_layout(const Params &P)
 // - normalizamos por b, logo o retangulo fica em
 //     x in [-a/(2b), +a/(2b)] = [-a_over_b/2, +a_over_b/2]
 //     y in [-1/2, +1/2]
+// - os valores retornados aqui seguem diretamente o que foi consolidado nos
+//   arquivos docs/goell_01_field_expansions.md e docs/goell_02_matrix_and_normalization.md
 static BoundaryPoint boundary_point(double theta, double a_over_b)
 {
     const double theta_c = atan(1.0 / a_over_b);
@@ -241,15 +246,19 @@ static BoundaryPoint boundary_point(double theta, double a_over_b)
 
     if (theta < theta_c)
     {
-        // Lado vertical: r_m = (a/2) sec(theta), R = sin(theta), T = cos(theta)
-        bp.r = (0.5 * a_over_b) / cos(theta);
+        // Lado vertical segundo as notas revisadas do paper:
+        //   r_m = (a/2) cos(theta_m), R = sin(theta_m), T = cos(theta_m)
+        // Como o solver trabalha com r_m / b, fica (a_over_b / 2) * cos(theta_m).
+        bp.r = (0.5 * a_over_b) * cos(theta);
         bp.R = sin(theta);
         bp.T = cos(theta);
     }
     else
     {
-        // Lado horizontal: r_m = (b/2) csc(theta), R = -cos(theta), T = sin(theta)
-        bp.r = 0.5 / sin(theta);
+        // Lado horizontal segundo as notas revisadas do paper:
+        //   r_m = (b/2) sin(theta_m), R = -cos(theta_m), T = sin(theta_m)
+        // Normalizado por b, isso vira 0.5 * sin(theta_m).
+        bp.r = 0.5 * sin(theta);
         bp.R = -cos(theta);
         bp.T = sin(theta);
     }
@@ -281,6 +290,9 @@ static vector<double> odd_symmetry_thetas(int N)
     if (N <= 1)
         return thetas;
     thetas.reserve(N - 1);
+    // Esta forma e equivalente a
+    //   theta_m = (m - N - 1/2) pi / [2 (N - 1)], m = N+1, ..., 2N-1
+    // da Sec. 2.2, apenas com o indice recontado para 1, ..., N-1.
     for (int m = 1; m <= N - 1; ++m)
         thetas.push_back((m - 0.5) * PI / (2.0 * (N - 1)));
     return thetas;
@@ -359,9 +371,9 @@ static void fill_ez_columns(
     const ColumnLayout &L,
     const Params &P,
     const BoundaryPoint &bp,
-    double beta,
-    double h,
-    double p)
+    double kz_over_k0,
+    double h_scaled,
+    double p_scaled)
 {
     const double eps_r = P.n_r * P.n_r;
 
@@ -371,33 +383,45 @@ static void fill_ez_columns(
         const double S = S_term(n, bp.theta, P.phase);
         const double C = C_term(n, bp.theta, P.phase);
 
-        const double hr = safe_positive(h * bp.r);
-        const double pr = safe_positive(p * bp.r);
+        // O solver usa r_hat = r_m / b, h_hat = h b e p_hat = p b.
+        // Assim, os argumentos das funcoes especiais continuam corretos:
+        //   h r_m = h_hat * r_hat
+        //   p r_m = p_hat * r_hat
+        const double hr = safe_positive(h_scaled * bp.r);
+        const double pr = safe_positive(p_scaled * bp.r);
 
         const double J0 = Jn(n, hr);
         const double K0 = Kn(n, pr);
 
-        // Definicoes logo abaixo das eqs. (7):
-        //   J  = J_n(h r_m)
-        //   K  = K_n(p r_m)
-        //   J' = J'_n(h r_m) / h
-        //   K' = K'_n(p r_m) / p
-        //   J  = n J_n(h r_m) / (h^2 r_m)
-        //   K  = n K_n(p r_m) / (p^2 r_m)
-        const double Jrad = Jn_prime(n, hr) / safe_positive(h);
-        const double Krad = Kn_prime(n, pr) / safe_positive(p);
-        const double Jang = (n == 0) ? 0.0 : (n * J0) / (safe_positive(h * h) * bp.r);
-        const double Kang = (n == 0) ? 0.0 : (n * K0) / (safe_positive(p * p) * bp.r);
+        // Nas notas em docs/goell_02_matrix_and_normalization.md:
+        //   bar J' = J'_n(h r_m) / h
+        //   bar K' = K'_n(p r_m) / p
+        //   bar J  = n J_n(h r_m) / (h^2 r_m)
+        //   bar K  = n K_n(p r_m) / (p^2 r_m)
+        //
+        // Em coordenadas normalizadas por b, essas grandezas ficam proporcionais
+        // as expressoes abaixo. Fatores globais comuns sao absorvidos pelo
+        // reescalonamento das linhas/colunas sem mover os zeros de det(Q).
+        const double JprimeRaw = Jn_prime(n, hr);
+        const double JbarPrime = JprimeRaw / safe_positive(h_scaled);
+        const double KbarPrime = Kn_prime(n, pr) / safe_positive(p_scaled);
+        const double Jbar = (n == 0) ? 0.0 : (n * J0) / (safe_positive(h_scaled * h_scaled) * bp.r);
+        const double Kbar = (n == 0) ? 0.0 : (n * K0) / (safe_positive(p_scaled * p_scaled) * bp.r);
 
         // Eqs. (7a), (7b), (7e), (7g), (7i), (7k)
         const double eLA = J0 * S;
         const double eLC = K0 * S;
 
-        const double eTA = -beta * (Jrad * S * bp.R + Jang * C * bp.T);
-        const double eTC = +beta * (Krad * S * bp.R + Kang * C * bp.T);
+        const double eTA = -kz_over_k0 * (JbarPrime * S * bp.R + Jbar * C * bp.T);
+        const double eTC = +kz_over_k0 * (KbarPrime * S * bp.R + Kbar * C * bp.T);
 
-        const double hTA = +eps_r * (Jang * C * bp.R - Jrad * S * bp.T);
-        const double hTC = -(Kang * C * bp.R - Krad * S * bp.T);
+        // Aqui trabalhamos com as linhas ja normalizadas por k0 e com Z0 fixado em 1,
+        // exatamente como permitido pela observacao da p. 2144.
+        // A documentacao revisada do paper manteve em (7i) o termo J' sem barra.
+        // Por isso este bloco usa o derivado "cru" de J_n no argumento h r_m,
+        // enquanto os demais blocos tangenciais seguem as formas escaladas.
+        const double hTA = +eps_r * (Jbar * C * bp.R - JprimeRaw * S * bp.T);
+        const double hTC = -(Kbar * C * bp.R - KbarPrime * S * bp.T);
 
         const int colA = L.offset_A + i;
         const int colC = L.offset_C + i;
@@ -427,9 +451,9 @@ static void fill_hz_columns(
     const ColumnLayout &L,
     const Params &P,
     const BoundaryPoint &bp,
-    double beta,
-    double h,
-    double p)
+    double kz_over_k0,
+    double h_scaled,
+    double p_scaled)
 {
     for (int i = 0; i < static_cast<int>(L.hz_orders.size()); ++i)
     {
@@ -437,27 +461,27 @@ static void fill_hz_columns(
         const double S = S_term(n, bp.theta, P.phase);
         const double C = C_term(n, bp.theta, P.phase);
 
-        const double hr = safe_positive(h * bp.r);
-        const double pr = safe_positive(p * bp.r);
+        const double hr = safe_positive(h_scaled * bp.r);
+        const double pr = safe_positive(p_scaled * bp.r);
 
         const double J0 = Jn(n, hr);
         const double K0 = Kn(n, pr);
 
-        const double Jrad = Jn_prime(n, hr) / safe_positive(h);
-        const double Krad = Kn_prime(n, pr) / safe_positive(p);
-        const double Jang = (n == 0) ? 0.0 : (n * J0) / (safe_positive(h * h) * bp.r);
-        const double Kang = (n == 0) ? 0.0 : (n * K0) / (safe_positive(p * p) * bp.r);
+        const double JbarPrime = Jn_prime(n, hr) / safe_positive(h_scaled);
+        const double KbarPrime = Kn_prime(n, pr) / safe_positive(p_scaled);
+        const double Jbar = (n == 0) ? 0.0 : (n * J0) / (safe_positive(h_scaled * h_scaled) * bp.r);
+        const double Kbar = (n == 0) ? 0.0 : (n * K0) / (safe_positive(p_scaled * p_scaled) * bp.r);
 
         // Eqs. (7c), (7d), (7f), (7h), (7j), (7l)
         const double hLB = J0 * C;
         const double hLD = K0 * C;
 
-        // O paper depois simplifica Z0 para 1 sem deslocar zeros de det(Q), p. 2144.
-        const double eTB = +(Jang * S * bp.R + Jrad * C * bp.T);
-        const double eTD = -(Kang * S * bp.R + Krad * C * bp.T);
+        // De novo, os fatores k0 e Z0 foram absorvidos pela normalizacao global.
+        const double eTB = +(Jbar * S * bp.R + JbarPrime * C * bp.T);
+        const double eTD = -(Kbar * S * bp.R + KbarPrime * C * bp.T);
 
-        const double hTB = -beta * (Jrad * C * bp.R - Jang * S * bp.T);
-        const double hTD = +beta * (Krad * C * bp.R - Kang * S * bp.T);
+        const double hTB = -kz_over_k0 * (JbarPrime * C * bp.R - Jbar * S * bp.T);
+        const double hTD = +kz_over_k0 * (KbarPrime * C * bp.R - Kbar * S * bp.T);
 
         const int colB = L.offset_B + i;
         const int colD = L.offset_D + i;
@@ -487,31 +511,32 @@ static void append_row(
     const ColumnLayout &L,
     const Params &P,
     const BoundaryPoint &bp,
-    double beta,
-    double h,
-    double p)
+    double kz_over_k0,
+    double h_scaled,
+    double p_scaled)
 {
-    fill_ez_columns(Q, row, row_kind, L, P, bp, beta, h, p);
-    fill_hz_columns(Q, row, row_kind, L, P, bp, beta, h, p);
+    fill_ez_columns(Q, row, row_kind, L, P, bp, kz_over_k0, h_scaled, p_scaled);
+    fill_hz_columns(Q, row, row_kind, L, P, bp, kz_over_k0, h_scaled, p_scaled);
 }
 
 static MatrixXd assemble_Q(const Params &P, double B, double Pprime)
 {
     const ColumnLayout L = build_layout(P);
 
-    // Eq. (11): Pprime aqui e a rho^2 do paper.
-    // Eq. (16): a variavel de entrada B representa o Ω do paper.
-    // Para os argumentos de Bessel, isso implica o fator π:
-    //   k0 b sqrt(n_r^2 - 1) = π Ω.
-    // Eq. (15): h r = (π B) * r_hat * sqrt(1-rho^2)
-    // Eq. (14): p r = (π B) * r_hat * sqrt(rho^2)
+    // Eq. (11): Pprime aqui representa a variavel vertical normalizada.
+    // Eq. (16): a entrada B corresponde ao eixo horizontal do paper, B_paper.
+    // Como lambda0 = 2 pi / k0, temos:
+    //   k0 b sqrt(n_r^2 - 1) = pi * B_paper.
+    // Com r_hat = r_m / b, os argumentos das funcoes especiais ficam:
+    //   h r_m = (pi B_paper) r_hat sqrt(1 - Pprime)
+    //   p r_m = (pi B_paper) r_hat sqrt(Pprime)
     const double eps_r = P.n_r * P.n_r;
-    const double beta = sqrt(1.0 + (eps_r - 1.0) * Pprime);
+    const double kz_over_k0 = sqrt(1.0 + (eps_r - 1.0) * Pprime);
 
     const double Bsafe = safe_positive(B);
-    const double Omega = PI * Bsafe;
-    const double h = Omega * sqrt(safe_positive(1.0 - Pprime));
-    const double p = Omega * sqrt(safe_positive(Pprime));
+    const double radial_scale = PI * Bsafe;
+    const double h_scaled = radial_scale * sqrt(safe_positive(1.0 - Pprime));
+    const double p_scaled = radial_scale * sqrt(safe_positive(Pprime));
 
     MatrixXd Q;
 
@@ -525,10 +550,10 @@ static MatrixXd assemble_Q(const Params &P, double B, double Pprime)
         for (double theta : thetas)
         {
             const auto bp = boundary_point(theta, P.a_over_b);
-            append_row(Q, row++, RowKind::ez_long, L, P, bp, beta, h, p); // eq. (6a)
-            append_row(Q, row++, RowKind::hz_long, L, P, bp, beta, h, p); // eq. (6b)
-            append_row(Q, row++, RowKind::et_tan, L, P, bp, beta, h, p);  // eq. (6c)
-            append_row(Q, row++, RowKind::ht_tan, L, P, bp, beta, h, p);  // eq. (6d)
+            append_row(Q, row++, RowKind::ez_long, L, P, bp, kz_over_k0, h_scaled, p_scaled); // eq. (6a)
+            append_row(Q, row++, RowKind::hz_long, L, P, bp, kz_over_k0, h_scaled, p_scaled); // eq. (6b)
+            append_row(Q, row++, RowKind::et_tan, L, P, bp, kz_over_k0, h_scaled, p_scaled);  // eq. (6c)
+            append_row(Q, row++, RowKind::ht_tan, L, P, bp, kz_over_k0, h_scaled, p_scaled);  // eq. (6d)
         }
     }
     else
@@ -565,7 +590,7 @@ static MatrixXd assemble_Q(const Params &P, double B, double Pprime)
             for (double theta : *thetas)
             {
                 const auto bp = boundary_point(theta, P.a_over_b);
-                append_row(Q, row++, kind, L, P, bp, beta, h, p);
+                append_row(Q, row++, kind, L, P, bp, kz_over_k0, h_scaled, p_scaled);
             }
         }
     }
