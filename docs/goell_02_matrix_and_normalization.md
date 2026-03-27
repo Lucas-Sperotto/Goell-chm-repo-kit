@@ -10,28 +10,24 @@ For the longitudinal electric field,
 
 $$
 E^{LA} A = E^{LC} C,
-\tag{6a}
 $$
 
 for the longitudinal magnetic field,
 
 $$
 H^{LB} B = H^{LD} D,
-\tag{6b}
 $$
 
 for the tangential electric field,
 
 $$
 E^{TA} A + E^{TB} B = E^{TC} C + E^{TD} D,
-\tag{6c}
 $$
 
 and for the tangential magnetic field,
 
 $$
 H^{TA} A + H^{TB} B = H^{TC} C + H^{TD} D.
-\tag{6d}
 $$
 
 Here `A`, `B`, `C`, and `D` are column vectors of the modal coefficients `a_n`, `b_n`, `c_n`, and `d_n`.
@@ -59,6 +55,12 @@ K = K_n(p r_m),
 $$
 
 $$
+J' = J_n'(h r_m),
+\qquad
+K' = K_n'(p r_m),
+$$
+
+$$
 J' = \frac{J_n'(h r_m)}{h},
 \qquad
 K' = \frac{K_n'(p r_m)}{p},
@@ -75,7 +77,7 @@ $$
 The paper also defines
 
 $$
-Z_0 = \left(\frac{\mu_0}{\epsilon_0}\right)^{1/2},
+Z_0 = (\frac{\mu_0}{\epsilon_0})^{1/2},
 \qquad
 \epsilon_r = \frac{\epsilon_1}{\epsilon_0}.
 $$
@@ -105,9 +107,9 @@ $$
 At the corner `\theta = \theta_c`, the paper assumes the boundary to be perpendicular to the radial line, giving
 
 $$
-R = \cos\left(\theta_c + \frac{\pi}{4}\right),
+R = \cos(\theta_c + \frac{\pi}{4}),
 \qquad
-T = \cos\left(\theta_c - \frac{\pi}{4}\right),
+T = \cos(\theta_c - \frac{\pi}{4}),
 \qquad
 r_m = \frac{\sqrt{a^2 + b^2}}{4}.
 $$
@@ -118,62 +120,50 @@ Paper eqs. (7a)-(7l):
 
 $$
 e_{mn}^{LA} = J S,
-\tag{7a}
 $$
 
 $$
 e_{mn}^{LC} = K S,
-\tag{7b}
 $$
 
 $$
 h_{mn}^{LB} = J C,
-\tag{7c}
 $$
 
 $$
 h_{mn}^{LD} = K C,
-\tag{7d}
 $$
 
 $$
-e_{mn}^{TA} = -k_z\left(J' S R + \bar J C T\right),
-\tag{7e}
+e_{mn}^{TA} = -k_z (J' S R + \bar J C T),
 $$
 
 $$
-e_{mn}^{TB} = k_0 Z_0\left(\bar J S R + J' C T\right),
-\tag{7f}
+e_{mn}^{TB} = k_0 Z_0 (\bar J S R + J' C T),
 $$
 
 $$
-e_{mn}^{TC} = k_z\left(K' S R + \bar K C T\right),
-\tag{7g}
+e_{mn}^{TC} = k_z (K' S R + \bar K C T),
 $$
 
 $$
-e_{mn}^{TD} = -k_0 Z_0\left(\bar K S R + K' C T\right),
-\tag{7h}
+e_{mn}^{TD} = -k_0 Z_0 (\bar K S R + K' C T),
 $$
 
 $$
-h_{mn}^{TA} = \frac{\epsilon_r k_0}{Z_0}\left(\bar J C R - J' S T\right),
-\tag{7i}
+h_{mn}^{TA} = \frac{\epsilon_r k_0}{Z_0} (\bar J C R - J' S T),
 $$
 
 $$
-h_{mn}^{TB} = -k_z\left(J' C R - \bar J S T\right),
-\tag{7j}
+h_{mn}^{TB} = -k_z (J' C R - \bar J S T),
 $$
 
 $$
-h_{mn}^{TC} = -\frac{k_0}{Z_0}\left(\bar K C R - K' S T\right),
-\tag{7k}
+h_{mn}^{TC} = -\frac{k_0}{Z_0} (\bar K C R - K' S T),
 $$
 
 $$
-h_{mn}^{TD} = k_z\left(K' C R - \bar K S T\right).
-\tag{7l}
+h_{mn}^{TD} = k_z (K' C R - \bar K S T).
 $$
 
 ## Orthogonality / Transverse-Field Note
@@ -184,23 +174,12 @@ The transverse fields are orthogonal only when
 
 $$
 E_t \cdot H_t = E_r H_r + E_{\theta} H_{\theta} = 0.
-\tag{8}
 $$
 
 From eq. (3), the paper writes
 
 $$
-E_t \cdot H_t
-=
-\frac{k^2 - k_z^2}{k_z^2}
-\left(
-\frac{\partial H_z}{\partial r}\frac{\partial E_z}{\partial r}
-+
-\frac{1}{r^2}
-\frac{\partial H_z}{\partial \theta}
-\frac{\partial E_z}{\partial \theta}
-\right).
-\tag{9}
+E_t \cdot H_t = \frac{k_z^2 - k^2}{k_z^2} ( \frac{\partial H_z}{\partial r}\frac{\partial E_z}{\partial r} + \frac{1}{r^2} \frac{\partial H_z}{\partial \theta} \frac{\partial E_z}{\partial \theta}).
 $$
 
 This is not part of the root search, but it matters later for field interpretation.
@@ -211,7 +190,6 @@ Paper eq. (10):
 
 $$
 h r = \left[k_1^2 - k_0^2 - p^2\right]^{1/2} r.
-\tag{10}
 $$
 
 The paper then introduces the normalized propagation quantity and the normalized radial quantity.
@@ -226,41 +204,35 @@ Paper eq. (11):
 $$
 P^2_{paper}
 =
-\frac{\left(k_z/k_0\right)^2 - 1}{n_r^2 - 1},
-\tag{11}
+\frac{(k_z/k_0)^2 - 1}{n_r^2 - 1},
 $$
 
 paper eq. (12):
 
 $$
-\Omega = r k_0 \left(n_r^2 - 1\right)^{1/2},
-\tag{12}
+\Omega = r k_0 (n_r^2 - 1)^{1/2},
 $$
 
 paper eq. (13):
 
 $$
-n_r = \frac{k_1}{k_0},
-\tag{13}
+n_r = \frac{k_1}{k_0}^{1/2},
 $$
 
 and therefore
 
 $$
 p r = P_{paper}\,\Omega,
-\tag{14}
 $$
 
 $$
-h r = \Omega\left(1 - P^2_{paper}\right)^{1/2}.
-\tag{15}
+h r = \Omega(1 - P^2_{paper})^{1/2}.
 $$
 
 For the propagation curves, the paper uses as horizontal variable
 
 $$
-B_{paper} = \frac{2b}{\lambda_0}\left(n_r^2 - 1\right)^{1/2},
-\tag{16}
+B_{paper} = \frac{2b}{\lambda_0}(n_r^2 - 1)^{1/2},
 $$
 
 with `\lambda_0 = 2\pi/k_0`.
@@ -273,7 +245,6 @@ P^2_{paper}
 \frac{k_z/k_0 - 1}{\Delta n_r},
 \qquad
 \Delta n_r = n_r - 1.
-\tag{17}
 $$
 
 ## Global Matrix Equation
@@ -282,7 +253,6 @@ Paper eq. (18):
 
 $$
 [Q][T] = 0,
-\tag{18}
 $$
 
 with
@@ -313,7 +283,6 @@ The modal condition is then
 
 $$
 \det[Q] = 0.
-\tag{19}
 $$
 
 ## Root Search Notes From Section 2.7.1

@@ -146,7 +146,7 @@ S = \sin(n\theta_m + \phi),
 \qquad
 C = \cos(n\theta_m + \phi),
 \qquad
-\phi \in \left\{0,\frac{\pi}{2}\right\}.
+\phi \in \{0,\frac{\pi}{2}\}.
 $$
 
 This means:
@@ -167,16 +167,7 @@ $$
 eq. (1c) is rewritten as
 
 $$
-E_{zo}
-=
-\sum_{n=0}^{\infty}
-c_n K_n(pr)
-\left[
-\sin(n\alpha)\cos\frac{n\pi}{2}
-+
-\cos(n\alpha)\sin\frac{n\pi}{2}
-\right].
-\tag{5}
+E_{zo} = \sum_{n=0}^{\infty} c_n K_n(pr) [ \sin(n\alpha)\cos\frac{n\pi}{2} + \cos(n\alpha)\sin\frac{n\pi}{2} ].
 $$
 
 From this, the paper concludes:
