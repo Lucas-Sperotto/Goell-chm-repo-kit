@@ -80,6 +80,7 @@ PSCAN="${PSCAN:-160}"
 METRIC="${METRIC:-sv}"
 ALL_MINIMA="${ALL_MINIMA:-1}"
 PLOT_MERIT_MAX="${PLOT_MERIT_MAX:-}"
+RESCALE_MATRIX="${RESCALE_MATRIX:-auto}"
 
 if [ -z "$PLOT_MERIT_MAX" ] && [ "$METRIC" = "sv" ]; then
   PLOT_MERIT_MAX="-8"
@@ -99,11 +100,12 @@ run_case() {
   local phase="$3"
   local outfile="$4"
 
-  local n nb pscan metric
+  local n nb pscan metric rescale_mode
   n="$(case_value "$prefix" N "$N")"
   nb="$(case_value "$prefix" NB "$NB")"
   pscan="$(case_value "$prefix" PSCAN "$PSCAN")"
   metric="$(case_value "$prefix" METRIC "$METRIC")"
+  rescale_mode="$(case_value "$prefix" RESCALE_MATRIX "$RESCALE_MATRIX")"
 
   local args=(
     --parity "$parity"
@@ -120,6 +122,17 @@ run_case() {
 
   if [ "$ALL_MINIMA" = "1" ]; then
     args+=(--all-minima)
+  fi
+
+  if [ "$rescale_mode" = "off" ]; then
+    args+=(--no-rescale)
+  elif [ "$rescale_mode" = "on" ]; then
+    args+=(--rescale)
+  elif [ "$rescale_mode" = "auto" ] && [ "$metric" = "det" ]; then
+    # Para metric=det, o reescalonamento altera bastante a paisagem dos minimos
+    # mesmo sem mover os zeros exatos. Para a busca por minimos, desligar o
+    # reescalonamento ficou mais proximo do comportamento esperado do paper.
+    args+=(--no-rescale)
   fi
 
   "$BIN" "${args[@]}" > "$outfile"
@@ -158,6 +171,7 @@ echo "Figura: $FIGURE"
 echo "  a/b = $A_OVER_B"
 echo "  n_r = $NR"
 echo "  N = $N, NB = $NB, Pscan = $PSCAN, metric = $METRIC"
+echo "  RESCALE_MATRIX = $RESCALE_MATRIX"
 echo "Arquivos gerados:"
 echo "  $ODD_PHI0_CSV"
 echo "  $ODD_PHI90_CSV"

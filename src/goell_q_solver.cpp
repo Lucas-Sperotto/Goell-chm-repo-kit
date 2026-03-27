@@ -84,6 +84,11 @@ struct Params
     // branch_id aqui e so o indice local do minimo em cada B.
     bool all_minima = true;
 
+    // O artigo procura raizes dentro de (0,1). Por padrao, nao tratamos a
+    // primeira e a ultima amostra da varredura como minimos validos, porque
+    // isso tende a introduzir ramos espurios colados em Pprime ~ 0 e Pprime ~ 1.
+    bool allow_edge_minima = false;
+
     // O paper comenta em p. 2144 que multiplicar linhas/colunas por fatores positivos
     // nao desloca os zeros do determinante. Usamos um reescalonamento bruto para ajudar
     // a condicao numerica sem alterar os zeros de det(Q).
@@ -658,10 +663,6 @@ static vector<Sample> local_minima(const vector<Sample> &samples)
     if (samples.size() < 2)
         return mins;
 
-    // Raizes proximas de P'=0 ou P'=1 aparecem como minimos unilaterais.
-    if (isfinite(samples.front().merit) && samples.front().merit < samples[1].merit)
-        mins.push_back(samples.front());
-
     for (size_t i = 1; i + 1 < samples.size(); ++i)
     {
         if (isfinite(samples[i].merit) &&
@@ -671,6 +672,18 @@ static vector<Sample> local_minima(const vector<Sample> &samples)
             mins.push_back(samples[i]);
         }
     }
+
+    return mins;
+}
+
+static vector<Sample> edge_minima(const vector<Sample> &samples)
+{
+    vector<Sample> mins;
+    if (samples.size() < 2)
+        return mins;
+
+    if (isfinite(samples.front().merit) && samples.front().merit < samples[1].merit)
+        mins.push_back(samples.front());
 
     if (isfinite(samples.back().merit) && samples.back().merit < samples[samples.size() - 2].merit)
         mins.push_back(samples.back());
@@ -795,11 +808,15 @@ static void parse_args(int argc, char **argv, Params &P)
         }
         else if (arg == "--all-minima")
             P.all_minima = true;
+        else if (arg == "--allow-edge-minima")
+            P.allow_edge_minima = true;
         else if (arg == "--dump-scan")
         {
             P.dump_scan = true;
             next_double(P.dump_B);
         }
+        else if (arg == "--rescale")
+            P.rescale_matrix = true;
         else if (arg == "--no-rescale")
             P.rescale_matrix = false;
         else if (arg == "--family")
@@ -854,6 +871,11 @@ int main(int argc, char **argv)
 
         auto coarse = scan_P(P, B);
         auto mins = local_minima(coarse);
+        if (P.allow_edge_minima)
+        {
+            auto e = edge_minima(coarse);
+            mins.insert(mins.end(), e.begin(), e.end());
+        }
         sort(mins.begin(), mins.end(), [](const Sample &a, const Sample &b)
              { return a.Pprime < b.Pprime; });
 
