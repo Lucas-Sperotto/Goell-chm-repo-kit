@@ -1,6 +1,12 @@
 # build artifacts
 /build/
 /build/**
+/out/
+/out/**
+/figures/
+/figures/**
+/data/
+/data/**
 *.o
 *.obj
 *.exe
@@ -10,6 +16,7 @@
 __pycache__/
 *.pyc
 .venv/
+.venv_pdf/
 
 # Prerequisites
 *.d
@@ -52,3 +59,4 @@ __pycache__/
 
 # debug information files
 *.dwo
+.vscode/
