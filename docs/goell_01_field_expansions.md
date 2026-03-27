@@ -37,7 +37,7 @@ $$
 E_{zi} =
 \sum_{n=0}^{\infty}
 a_n J_n(hr)\,\sin(n\theta + \phi_n)\,
-\exp\!\left[i(k_z z - \omega t)\right],
+\exp[i(k_z z - \omega t)],
 \tag{1a}
 $$
 
