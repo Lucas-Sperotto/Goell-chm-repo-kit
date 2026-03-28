@@ -31,67 +31,15 @@ $$
 
 ## Expansoes Dos Campos Longitudinais
 
-Equacoes (1a)-(1d) do artigo:
-
-$$
-E_{z1} = \sum_{n=0}^{\infty} a_n J_n(hr) \sin(n\theta + \phi_n) \exp[i(k_z z - \omega t)],
-$$
-
-$$
-H_{z1} = \sum_{n=0}^{\infty} b_n J_n(hr) \sin(n\theta + \psi_n) \exp[i(k_z z - \omega t)],
-$$
-
-dentro do nucleo, e
-
-$$
-E_{z0} = \sum_{n=0}^{\infty} c_n K_n(pr) \sin(n\theta + \phi_n) \exp[i(k_z z - \omega t)],
-$$
-
-$$
-H_{z0} = \sum_{n=0}^{\infty} d_n K_n(pr) \sin(n\theta + \psi_n) \exp[i(k_z z - \omega t)],
-$$
-
 fora do nucleo.
 
 ## Numeros De Onda Radiais
 
 Equacoes (2a)-(2b):
 
-$$
-h = (k_1^2 - k_z^2)^{1/2},
-$$
-
-$$
-p = (k_z^2 - k_0^2)^{1/2},
-$$
-
-com
-
-$$
-k_1 = \omega(\mu_0 \epsilon_1)^{1/2},
-\qquad
-k_0 = \omega(\mu_0 \epsilon_0)^{1/2}.
-$$
-
 ## Componentes Transversais Dos Campos
 
 Equacoes (3a)-(3d), onde `k` pode ser `k_1` ou `k_0` dependendo da regiao:
-
-$$
-E_r = \frac{i k_z}{k^2 - k_z^2} \left[\frac{\partial E_z}{\partial r} + \frac{\mu_0 \omega}{k_z r} \frac{\partial H_z}{\partial \theta}\right],
-$$
-
-$$
-E_{\theta} = \frac{i k_z}{k^2 - k_z^2} \left[\frac{1}{r}\frac{\partial E_z}{\partial \theta} - \frac{\mu_0 \omega}{k_z} \frac{\partial H_z}{\partial r}\right],
-$$
-
-$$
-H_r = \frac{i k_z}{k^2 - k_z^2} \left[ - \frac{k^2}{\mu_0 \omega k_z r} \frac{\partial E_z}{\partial \theta} + \frac{\partial H_z}{\partial r}\right],
-$$
-
-$$
-H_{\theta} = \frac{i k_z}{k^2 - k_z^2} \left[ \frac{k^2}{\mu_0 \omega k_z} \frac{\partial E_z}{\partial r} + \frac{1}{r}\frac{\partial H_z}{\partial \theta}\right].
-$$
 
 Estas expressoes sao a base das equacoes tangenciais depois empacotadas nas matrizes da Secao 2.3.
 
@@ -101,23 +49,7 @@ Equacoes (4a)-(4b):
 
 Nos lados verticais,
 
-$$
-E_t = \pm\left(E_r \sin\theta + E_{\theta}\cos\theta\right),
-\qquad
--\theta_c < \theta < \theta_c,
-\qquad
-\pi-\theta_c < \theta < \pi+\theta_c,
-$$
-
 e nos lados horizontais,
-
-$$
-E_t = \pm\left(-E_r \cos\theta + E_{\theta}\sin\theta\right),
-\qquad
-\theta_c < \theta < \pi-\theta_c,
-\qquad
-\pi+\theta_c < \theta < 2\pi-\theta_c.
-$$
 
 O artigo observa que expressoes analogas valem para o campo magnetico tangencial.
 
@@ -168,10 +100,6 @@ $$
 
 a eq. (1c) e reescrita como
 
-$$
-E_{zo} = \sum_{n=0}^{\infty} c_n K_n(pr) [ \sin(n\alpha)\cos\frac{n\pi}{2} + \cos(n\alpha)\sin\frac{n\pi}{2} ].
-$$
-
 A partir disso, o artigo conclui:
 
 - simetria pura em relacao ao eixo `y` exige todos os `n` impares;
@@ -187,12 +115,6 @@ A Secao 2.2 fornece as regras para a escolha dos pontos de casamento usados nos 
 
 Para harmonicos impares, os pontos de casamento sao
 
-$$
-\theta_m = \frac{(m - 1/2)\pi}{2N},
-\qquad
-m = 1,2,\ldots,N,
-$$
-
 onde `N` e o numero de harmonicos espaciais.
 
 ### Casos Com Harmonicos Pares E Razao De Aspecto Unitaria
@@ -201,19 +123,7 @@ Para harmonicos pares e `a/b = 1`:
 
 - os componentes com simetria par em torno de `\theta = 0` usam
 
-$$
-\theta_m = \frac{(m - 1/2)\pi}{2N},
-\qquad
-m = 1,2,\ldots,N,
-$$
-
 - os componentes com simetria impar em torno de `\theta = 0` usam
-
-$$
-\theta_m = \frac{(m - N - 1/2)\pi}{2(N-1)},
-\qquad
-m = N+1, N+2, \ldots, 2N-1.
-$$
 
 Isso reduz o total para `4N - 2` coeficientes desconhecidos, em vez de `4N`.
 
