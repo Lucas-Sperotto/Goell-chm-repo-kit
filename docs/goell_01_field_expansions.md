@@ -1,26 +1,18 @@
-# Goell 1969 - Expansoes de Campo, Simetria e Pontos de Casamento
+# Goell 1969 - Expansoes De Campo, Simetria E Pontos De Casamento
 
-Estas notas reescrevem, em Markdown renderizavel, as equacoes do artigo que entram diretamente na formulacao numerica das Secoes 2.0, 2.1 e 2.2.
+Este arquivo e uma folha de referencia rapida para as Secoes 2.1 e 2.2 do artigo. A ideia nao e substituir a leitura guiada de [02_deriv.md](./02_deriv.md), mas reunir em um so lugar as expressoes que entram diretamente na implementacao.
 
-## Convencao De Notacao Usada Nestas Notas
+## 1. Geometria
 
-Dois simbolos do scan/OCR sao faceis de confundir visualmente, entao eu os nomeio aqui de forma explicita:
+O nucleo e retangular, centrado na origem, com dimensoes completas:
 
-- `P^2_paper`: variavel de propagacao normalizada usada no eixo vertical das Figs. 16-22.
-  No repositorio, ela ainda aparece na coluna `Pprime` dos CSVs.
-- `B_paper`: variavel horizontal definida na eq. (16).
-  No repositorio, ela ainda aparece simplesmente como `B`.
+- `a` na direcao `x`;
+- `b` na direcao `y`.
 
-Se algum glifo do PDF usar um estilo diferente de letra, estas notas podem ser ajustadas depois sem alterar a estrutura da implementacao.
-
-## Geometria
-
-O nucleo e retangular, centrado na origem, com dimensoes completas `a` na direcao `x` e `b` na direcao `y`. A propagacao ocorre ao longo de `+z`.
-
-No primeiro quadrante, o canto do retangulo esta em
+No primeiro quadrante, o canto esta em
 
 $$
-\left(\frac{a}{2}, \frac{b}{2}\right),
+\left(\frac{a}{2},\frac{b}{2}\right),
 $$
 
 e o angulo do canto e
@@ -29,43 +21,141 @@ $$
 \theta_c = \tan^{-1}\!\left(\frac{b}{a}\right).
 $$
 
-## Expansoes Dos Campos Longitudinais
+## 2. Expansoes Dos Campos Longitudinais
 
-fora do nucleo.
+### Interior do nucleo
 
-## Numeros De Onda Radiais
+$$
+E_{z1} =
+\sum_{n=0}^{\infty}
+a_n J_n(h r)\,\sin(n\theta + \phi_n)\,
+e^{i(k_z z - \omega t)},
+$$
 
-Equacoes (2a)-(2b):
+$$
+H_{z1} =
+\sum_{n=0}^{\infty}
+b_n J_n(h r)\,\sin(n\theta + \psi_n)\,
+e^{i(k_z z - \omega t)}.
+$$
 
-## Componentes Transversais Dos Campos
+### Exterior do nucleo
 
-Equacoes (3a)-(3d), onde `k` pode ser `k_1` ou `k_0` dependendo da regiao:
+$$
+E_{z0} =
+\sum_{n=0}^{\infty}
+c_n K_n(p r)\,\sin(n\theta + \phi_n)\,
+e^{i(k_z z - \omega t)},
+$$
 
-Estas expressoes sao a base das equacoes tangenciais depois empacotadas nas matrizes da Secao 2.3.
+$$
+H_{z0} =
+\sum_{n=0}^{\infty}
+d_n K_n(p r)\,\sin(n\theta + \psi_n)\,
+e^{i(k_z z - \omega t)}.
+$$
 
-## Campo Tangencial Na Fronteira Retangular
+## 3. Numeros De Onda Radiais
 
-Equacoes (4a)-(4b):
+$$
+h = \sqrt{k_1^2 - k_z^2},
+\qquad
+p = \sqrt{k_z^2 - k_0^2},
+$$
 
-Nos lados verticais,
+com
 
-e nos lados horizontais,
+$$
+k_1 = \omega \sqrt{\mu_0 \epsilon_1},
+\qquad
+k_0 = \omega \sqrt{\mu_0 \epsilon_0}.
+$$
 
-O artigo observa que expressoes analogas valem para o campo magnetico tangencial.
+Leitura fisica:
 
-## Simetria Em Relacao Ao Eixo x
+- `J_n` e regular na origem e por isso serve ao interior;
+- `K_n` decai no infinito e por isso serve ao exterior.
 
-A Secao 2.1 afirma que devem existir duas familias de fase:
+## 4. Componentes Transversais
 
-1. primeiro tipo:
+As componentes transversais sao obtidas a partir de `E_z` e `H_z`:
+
+$$
+E_r =
+\frac{i k_z}{k^2 - k_z^2}
+\left[
+\frac{\partial E_z}{\partial r}
++
+\frac{\mu_0 \omega}{k_z r}
+\frac{\partial H_z}{\partial \theta}
+\right],
+$$
+
+$$
+E_{\theta} =
+\frac{i k_z}{k^2 - k_z^2}
+\left[
+\frac{1}{r}\frac{\partial E_z}{\partial \theta}
+-
+\frac{\mu_0 \omega}{k_z}
+\frac{\partial H_z}{\partial r}
+\right],
+$$
+
+$$
+H_r =
+\frac{i k_z}{k^2 - k_z^2}
+\left[
+-
+\frac{k^2}{\mu_0 \omega k_z r}
+\frac{\partial E_z}{\partial \theta}
++
+\frac{\partial H_z}{\partial r}
+\right],
+$$
+
+$$
+H_{\theta} =
+\frac{i k_z}{k^2 - k_z^2}
+\left[
+\frac{k^2}{\mu_0 \omega k_z}
+\frac{\partial E_z}{\partial r}
++
+\frac{1}{r}\frac{\partial H_z}{\partial \theta}
+\right].
+$$
+
+Aqui `k` vale `k_1` no interior e `k_0` no exterior.
+
+## 5. Campo Tangencial Na Fronteira
+
+Nos trechos que correspondem aos lados verticais do retangulo:
+
+$$
+E_t = \pm(E_r \sin\theta + E_{\theta}\cos\theta).
+$$
+
+Nos trechos que correspondem aos lados horizontais:
+
+$$
+E_t = \pm(-E_r \cos\theta + E_{\theta}\sin\theta).
+$$
+
+O mesmo raciocinio vale para `H_t`.
+
+## 6. Familias De Fase
+
+O artigo identifica duas familias de fase:
+
+1. primeira familia:
 
 $$
 \phi_n = 0,
 \qquad
-\psi_n = \frac{\pi}{2},
+\psi_n = \frac{\pi}{2};
 $$
 
-2. segundo tipo:
+2. segunda familia:
 
 $$
 \phi_n = \frac{\pi}{2},
@@ -73,65 +163,68 @@ $$
 \psi_n = \pi.
 $$
 
-Mais adiante, o artigo condensa isso em um unico parametro `\phi` dentro dos fatores `S` e `C` usados nas equacoes de matriz:
+Na pratica, isso pode ser condensado em um unico parametro `\phi`:
 
 $$
 S = \sin(n\theta_m + \phi),
 \qquad
 C = \cos(n\theta_m + \phi),
 \qquad
-\phi \in \{0,\frac{\pi}{2}\}.
+\phi \in \left\{0,\frac{\pi}{2}\right\}.
 $$
 
-Isso implica:
+No codigo, essas familias aparecem como `phi0` e `phi90`.
 
-- se `\phi = 0`, entao `S = \sin(n\theta_m)` e `C = \cos(n\theta_m)`;
-- se `\phi = \pi/2`, entao `S = \cos(n\theta_m)` e `C = -\sin(n\theta_m)`.
+## 7. Paridade Dos Harmonicos
 
-## Simetria Em Relacao Ao Eixo y
+Pela simetria em relacao ao eixo `y`, cada modo deve usar:
 
-O artigo argumenta que qualquer modo deve ser composto inteiramente por harmonicos impares ou inteiramente por harmonicos pares.
+- apenas harmonicos impares, ou
+- apenas harmonicos pares.
 
-No exemplo ilustrativo da Secao 2.1, tomando
+No codigo, isso aparece como `odd` e `even`.
+
+## 8. Pontos De Casamento
+
+### Caso `odd`
 
 $$
-\alpha = \theta - \frac{\pi}{2},
+\theta_m =
+\frac{(m - 1/2)\pi}{2N},
+\qquad
+m = 1,\ldots,N.
 $$
 
-a eq. (1c) e reescrita como
+### Caso `even`, com `a/b = 1`
 
-A partir disso, o artigo conclui:
+Para componentes de simetria par em torno de `\theta = 0`,
 
-- simetria pura em relacao ao eixo `y` exige todos os `n` impares;
-- antissimetria pura em relacao ao eixo `y` exige todos os `n` pares.
+$$
+\theta_m =
+\frac{(m - 1/2)\pi}{2N},
+\qquad
+m = 1,\ldots,N.
+$$
 
-Esse e o ponto central que leva a separar o solver em classes `odd` e `even`.
+Para componentes de simetria impar em torno de `\theta = 0`,
 
-## Pontos De Casamento
+$$
+\theta_m =
+\frac{(m - N - 1/2)\pi}{2(N-1)},
+\qquad
+m = N+1,\ldots,2N-1.
+$$
 
-A Secao 2.2 fornece as regras para a escolha dos pontos de casamento usados nos resultados da Secao 3.
+### Caso `even`, com `a/b \neq 1`
 
-### Casos Com Harmonicos Impares
+O artigo diz para usar a primeira formula para todos os pontos, exceto pelos dois pontos extremos do componente `z` impar, que devem ser omitidos.
 
-Para harmonicos impares, os pontos de casamento sao
+## 9. Uso Pratico No Repositorio
 
-onde `N` e o numero de harmonicos espaciais.
+Estas definicoes entram diretamente em:
 
-### Casos Com Harmonicos Pares E Razao De Aspecto Unitaria
+- escolha da classe modal em `src/goell_q_solver.cpp`;
+- geracao dos pontos de contorno;
+- montagem dos blocos da matriz `Q`.
 
-Para harmonicos pares e `a/b = 1`:
-
-- os componentes com simetria par em torno de `\theta = 0` usam
-
-- os componentes com simetria impar em torno de `\theta = 0` usam
-
-Isso reduz o total para `4N - 2` coeficientes desconhecidos, em vez de `4N`.
-
-### Casos Com Harmonicos Pares E Razao De Aspecto Nao Unitaria
-
-Para `a/b \neq 1`, o artigo afirma:
-
-- todos os pontos seguem a primeira formula acima;
-- exceto os primeiros e ultimos pontos do componente `z` impar, que sao omitidos.
-
-Essa regra especial e facil de implementar errado, entao vale a pena mantela destacada ao lado do codigo.
+Se houver duvida na implementacao, este arquivo deve ser lido em conjunto com [goell_02_matrix_and_normalization.md](./goell_02_matrix_and_normalization.md).

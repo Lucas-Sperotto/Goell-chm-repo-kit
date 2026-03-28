@@ -1,205 +1,306 @@
-# II. DERIVAÇÃO DAS EQUAÇÕES
+# II. Derivacao Das Equacoes - Leitura Guiada Da Secao Teorica
 
-O guia de onda considerado aqui consiste em um núcleo dielétrico retangular, de constante dielétrica constante, ε₀, cercado por um meio infinito de constante dielétrica ε₀. Ambos os meios são assumidos isotrópicos e com permeabilidade igual à do espaço livre. A Figura 2 mostra os sistemas de coordenadas (retangulares e cilíndricas) e as dimensões da seção transversal utilizadas neste artigo. A direção de propagação é no sentido do eixo z (em direção ao observador).
+## Como Ler Esta Secao
 
-Em coordenadas cilíndricas, as soluções de campo das equações de Maxwell assumem a forma de funções de Bessel e funções de Bessel modificadas multiplicadas por funções trigonométricas, juntamente com suas derivadas. Para que a propagação ocorra na direção z, as soluções de campo devem ser funções de Bessel no núcleo e funções de Bessel modificadas no exterior.
+Esta e a parte mais importante do artigo. E aqui que Goell transforma um problema fisico de propagacao guiada em um problema numerico de algebra linear.
 
-Como as funções de Bessel de segunda espécie possuem um polo na origem e as funções de Bessel modificadas de primeira espécie possuem um polo no infinito, a variação radial dos campos é assumida como uma soma de funções de Bessel de primeira espécie e suas derivadas dentro do núcleo e uma soma de funções de Bessel modificadas e suas derivadas fora do núcleo.
+Se eu tivesse de resumir a secao inteira em um unico diagrama mental, seria este:
 
-Em coordenadas cilíndricas, as componentes na direção z dos campos elétrico e magnético são dadas por (1a)
+1. escolher uma expansao adequada para os campos;
+2. usar simetria para reduzir o problema;
+3. impor as condicoes de contorno em pontos da fronteira;
+4. montar uma matriz `Q`;
+5. procurar os valores para os quais `det(Q) = 0`.
 
-$$
-E_{z1} = \sum_{n=0}^{\infty} a_n J_n(hr) \sin(n\theta + \phi_n) \exp[i(k_z z - \omega t)],
-$$
+Cada subsecao abaixo explica um desses passos.
 
-e (1b)
+## 2.0 Geometria E Convencoes
 
-$$
-H_{z1} = \sum_{n=0}^{\infty} b_n J_n(hr) \sin(n\theta + \psi_n) \exp[i(k_z z - \omega t)],
-$$
+O guia de onda considerado por Goell tem:
 
-dentro do nucleo, e por (1c)
+- um nucleo dieletrico retangular;
+- permissividade `\epsilon_1` no interior;
+- meio externo infinito com permissividade `\epsilon_0`;
+- permeabilidade `\mu_0` em ambas as regioes;
+- propagacao ao longo de `+z`.
 
-$$
-E_{z0} = \sum_{n=0}^{\infty} c_n K_n(pr) \sin(n\theta + \phi_n) \exp[i(k_z z - \omega t)],
-$$
+As dimensoes completas da secao transversal sao:
 
-e (1d)
+- `a` na direcao `x`;
+- `b` na direcao `y`.
 
-$$
-H_{z0} = \sum_{n=0}^{\infty} d_n K_n(pr) \sin(n\theta + \psi_n) \exp[i(k_z z - \omega t)],
-$$
-
-fora do núcleo, onde ω é a frequência angular e k_z é a constante de propagação longitudinal. As constantes de propagação transversal são dadas por:
-
-$$
-h = (k_1^2 - k_z^2)^{1/2},
-$$
+O nucleo fica centrado na origem, de modo que, no primeiro quadrante, o canto do retangulo esta em
 
 $$
-p = (k_z^2 - k_0^2)^{1/2},
+\left(\frac{a}{2}, \frac{b}{2}\right).
+$$
+
+O angulo radial que enxerga esse canto e
+
+$$
+\theta_c = \tan^{-1}\!\left(\frac{b}{a}\right).
+$$
+
+Comentario didatico: o artigo usa ao mesmo tempo coordenadas cartesianas e cilindricas. A fronteira fisica e retangular, mas a base funcional escolhida para os campos e circular. Essa tensao entre geometria da estrutura e geometria da expansao e o coracao do metodo.
+
+## 2.1 Expansao Dos Campos Longitudinais
+
+Goell parte das componentes longitudinais `E_z` e `H_z`, porque, em meios isotropicos, elas bastam para reconstruir as componentes transversais.
+
+### Dentro do nucleo
+
+As componentes longitudinais no interior sao escritas como
+
+$$
+E_{z1} =
+\sum_{n=0}^{\infty}
+a_n J_n(h r)\,\sin(n\theta + \phi_n)\,
+e^{i(k_z z - \omega t)},
+$$
+
+$$
+H_{z1} =
+\sum_{n=0}^{\infty}
+b_n J_n(h r)\,\sin(n\theta + \psi_n)\,
+e^{i(k_z z - \omega t)}.
+$$
+
+### Fora do nucleo
+
+No meio externo, as expansoes passam a ser
+
+$$
+E_{z0} =
+\sum_{n=0}^{\infty}
+c_n K_n(p r)\,\sin(n\theta + \phi_n)\,
+e^{i(k_z z - \omega t)},
+$$
+
+$$
+H_{z0} =
+\sum_{n=0}^{\infty}
+d_n K_n(p r)\,\sin(n\theta + \psi_n)\,
+e^{i(k_z z - \omega t)}.
+$$
+
+As constantes transversais sao
+
+$$
+h = \sqrt{k_1^2 - k_z^2},
+\qquad
+p = \sqrt{k_z^2 - k_0^2},
 $$
 
 com
 
 $$
-k_1 = \omega(\mu_0 \epsilon_1)^{1/2},
+k_1 = \omega \sqrt{\mu_0 \epsilon_1},
 \qquad
-k_0 = \omega(\mu_0 \epsilon_0)^{1/2}.
+k_0 = \omega \sqrt{\mu_0 \epsilon_0}.
 $$
 
-onde k₁ = ω√(μ₀ε₁) e k₀ = ω√(μ₀ε₀). Os termos Jₙ e Kₙ são funções de Bessel de ordem n e funções de Bessel modificadas, respectivamente, e ψₙ e φₙ são ângulos de fase arbitrários.
+### O Significado Fisico Dessa Escolha
 
-Os componentes transversais do campo são dados por:
+- `J_n(hr)` aparece no interior porque a solucao precisa ser regular na origem.
+- `K_n(pr)` aparece no exterior porque a solucao precisa decair quando `r \to \infty`.
 
-$$
-E_r = \frac{i k_z}{k^2 - k_z^2} \left[\frac{\partial E_z}{\partial r} + \frac{\mu_0 \omega}{k_z r} \frac{\partial H_z}{\partial \theta}\right],
-$$
+Comentario didatico: este e o primeiro grande acerto do metodo. O artigo nao escolhe funcoes bonitas; escolhe funcoes que respeitam a fisica radial do problema.
 
----
+## 2.2 Campos Transversais A Partir De `E_z` E `H_z`
 
-![Figura 2 – Dimensões e sistema de coordenadas](FIGURA_2_AQUI.png)
-
----
+As componentes transversais sao obtidas das equacoes de Maxwell. O artigo escreve
 
 $$
-E_{\theta} = \frac{i k_z}{k^2 - k_z^2} \left[\frac{1}{r}\frac{\partial E_z}{\partial \theta} - \frac{\mu_0 \omega}{k_z} \frac{\partial H_z}{\partial r}\right],
+E_r =
+\frac{i k_z}{k^2 - k_z^2}
+\left[
+\frac{\partial E_z}{\partial r}
++
+\frac{\mu_0 \omega}{k_z r}
+\frac{\partial H_z}{\partial \theta}
+\right],
 $$
 
 $$
-H_r = \frac{i k_z}{k^2 - k_z^2} \left[ - \frac{k^2}{\mu_0 \omega k_z r} \frac{\partial E_z}{\partial \theta} + \frac{\partial H_z}{\partial r}\right],
+E_{\theta} =
+\frac{i k_z}{k^2 - k_z^2}
+\left[
+\frac{1}{r}\frac{\partial E_z}{\partial \theta}
+-
+\frac{\mu_0 \omega}{k_z}
+\frac{\partial H_z}{\partial r}
+\right],
 $$
 
 $$
-H_{\theta} = \frac{i k_z}{k^2 - k_z^2} \left[ \frac{k^2}{\mu_0 \omega k_z} \frac{\partial E_z}{\partial r} + \frac{1}{r}\frac{\partial H_z}{\partial \theta}\right].
+H_r =
+\frac{i k_z}{k^2 - k_z^2}
+\left[
+-
+\frac{k^2}{\mu_0 \omega k_z r}
+\frac{\partial E_z}{\partial \theta}
++
+\frac{\partial H_z}{\partial r}
+\right],
 $$
 
-onde k pode ser k₁ ou k₀.
+$$
+H_{\theta} =
+\frac{i k_z}{k^2 - k_z^2}
+\left[
+\frac{k^2}{\mu_0 \omega k_z}
+\frac{\partial E_z}{\partial r}
++
+\frac{1}{r}\frac{\partial H_z}{\partial \theta}
+\right].
+$$
 
-Finalmente, o componente do campo elétrico tangente ao núcleo retangular é dado por:
+Aqui `k` representa `k_1` no interior e `k_0` no exterior.
+
+Comentario didatico: o artigo nao resolve um problema escalar. Os campos transversais misturam derivadas radiais e angulares de `E_z` e `H_z`. E exatamente essa mistura que acaba aparecendo nos blocos tangenciais da matriz.
+
+## 2.3 Campo Tangencial Na Fronteira Retangular
+
+O casamento de contorno nao e imposto em `E_r` e `E_{\theta}` isoladamente, mas no campo tangencial a fronteira do retangulo.
+
+Nos lados verticais, o artigo escreve
 
 $$
-E_t = \pm\left(E_r \sin\theta + E_{\theta}\cos\theta\right),
+E_t =
+\pm \left(E_r \sin\theta + E_{\theta}\cos\theta\right),
+$$
+
+para os intervalos angulares que enxergam esses lados.
+
+Nos lados horizontais,
+
+$$
+E_t =
+\pm \left(-E_r \cos\theta + E_{\theta}\sin\theta\right).
+$$
+
+Expressoes analogas valem para `H_t`.
+
+Comentario didatico: aqui a geometria do retangulo entra explicitamente. A base e circular, mas o campo tangencial e projetado na normal e na tangente corretas de cada trecho da fronteira.
+
+## 2.4 Efeitos Da Simetria
+
+Esta e uma das partes mais elegantes do artigo, porque ela reduz o problema sem perder fisica.
+
+### Simetria em relacao ao eixo `x`
+
+Goell mostra que existem duas familias de fase:
+
+1. primeira familia:
+
+$$
+\phi_n = 0,
 \qquad
--\theta_c < \theta < \theta_c,
+\psi_n = \frac{\pi}{2},
+$$
+
+2. segunda familia:
+
+$$
+\phi_n = \frac{\pi}{2},
 \qquad
-\pi-\theta_c < \theta < \pi+\theta_c,
+\psi_n = \pi.
 $$
 
-ou
+No repositorio, essas duas familias aparecem como:
+
+- `phi0`
+- `phi90`
+
+### Simetria em relacao ao eixo `y`
+
+O artigo reescreve uma das expansoes em torno de `\alpha = \theta - \pi/2` e conclui que um modo fisico completo deve usar:
+
+- apenas harmonicos impares, ou
+- apenas harmonicos pares.
+
+No repositorio, isso aparece como:
+
+- `odd`
+- `even`
+
+### O Resultado Pratico
+
+Em vez de um solver unico e cego, passamos a ter classes modais separadas por:
+
+- familia de fase;
+- paridade dos harmonicos.
+
+Comentario didatico: simetria aqui nao e um detalhe estetico. Ela reduz o tamanho da base, o numero de pontos de casamento e o risco de misturar modos de classes diferentes.
+
+## 2.5 Escolha Dos Pontos De Casamento
+
+Os pontos de casamento devem ser distribuidos simetricamente. Como a estrutura e simetrica em ambos os eixos, basta trabalhar em um quadrante.
+
+### Casos de harmonicos impares
+
+Para os casos `odd`, os pontos usados por Goell sao
 
 $$
-E_t = \pm\left(-E_r \cos\theta + E_{\theta}\sin\theta\right),
-\qquad
-\theta_c < \theta < \pi-\theta_c,
-\qquad
-\pi+\theta_c < \theta < 2\pi-\theta_c.
-$$
-
-onde θ_c é o ângulo que uma linha radial até o canto no primeiro quadrante faz com o eixo x. Expressões similares existem para o campo magnético tangencial.
-
----
-
-## 2.1 Efeitos da Simetria
-
-Como o guia de onda é simétrico em relação ao eixo x, os campos devem ser simétricos ou antissimétricos em relação a esse eixo. Isso ocorre porque a estrutura é invariante sob rotações de 180°, e portanto os padrões de campo devem ser invariantes sob essa rotação, exceto pelo sinal.
-
-A partir disso, e do fato de que θ/θ aparece em cada equação (3), fica evidente que dois tipos de modos devem existir:
-
-- o primeiro com φₙ = 0 e ψₙ = π/2  
-- o segundo com φₙ = π/2 e ψₙ = π  
-
-De forma semelhante, as funções de campo também devem ser simétricas ou antissimétricas em relação ao eixo y.
-
-Suponha, por exemplo, que E_z₀ apresente variação angular senoidal em torno de θ = 0 (E_z₀ é ímpar em relação ao eixo x). Então, fazendo α = θ − π/2, a equação (1c) pode ser escrita na forma:
-
-$$
-E_{zo} = \sum_{n=0}^{\infty} c_n K_n(pr) [ \sin(n\alpha)\cos\frac{n\pi}{2} + \cos(n\alpha)\sin\frac{n\pi}{2} ].
-$$
-
-Para que E_z₀ seja puramente simétrico em relação a α = 0 (eixo y), todos os n devem ser ímpares.  
-Para que seja antissimétrico, todos os n devem ser pares.
-
-Como resultados semelhantes se aplicam para variação cossenoidal de E_z₀, θ = 0,  e como todas as demais funções de campo também o são, qualquer modo deve consistir apenas de harmônicos pares ou apenas de harmônicos ímpares.
-
-Da análise anterior, fica claro que se os pontos de correspondência forem escolhidos simetricamente em relação aos eixos x e y, então, exceto pelo sinal, cada ponto terá um ponto equivalente em cada quadrante.
-
-Assim, a correspondência dos campos precisa ser feita apenas em um quadrante. Isso reduz:
-
-- o número de constantes por um fator 4  
-- o número de pontos necessários para uma mesma precisão também por um fator 4  
-
----
-
-## 2.2 Seleção dos Pontos de Correspondência
-
-Como mencionado na Seção 2.1, os pontos devem ser escolhidos simetricamente em relação aos eixos x e y.
-
-Para os casos com harmônicos ímpares, os pontos utilizados foram:
-
-$$
-\theta_m = \frac{(m - 1/2)\pi}{2N},
+\theta_m =
+\frac{(m - 1/2)\pi}{2N},
 \qquad
 m = 1,2,\ldots,N,
 $$
 
-com m = 1, ..., N, onde N é o número de harmônicos.
+onde `N` e o numero de harmonicos espaciais mantidos no truncamento.
 
-Para harmônicos pares, a escolha é mais complexa, pois a existência simultânea de um harmônico n = 0 para modos TE e TM é inconsistente com a simetria do guia.
+### Casos de harmonicos pares
 
-Assim:
+Aqui a situacao fica mais delicada, porque o termo `n = 0` nao pode ser admitido simultaneamente de forma ingenua em todos os blocos, sob pena de violar a simetria do problema.
 
-- número total de coeficientes = 4N − 2
-- em vez de 4N  
+Por isso:
 
-Os pontos são escolhidos da seguinte forma:
+- o numero total de incognitas passa de `4N` para `4N - 2`;
+- os pontos de casamento dependem do tipo de simetria da componente considerada.
 
-- para componentes com simetria par:
+Para `a/b = 1`, o artigo usa:
+
+- para componentes com simetria par em torno de `\theta = 0`,
 
 $$
-\theta_m = \frac{(m - 1/2)\pi}{2N},
+\theta_m =
+\frac{(m - 1/2)\pi}{2N},
 \qquad
-m = 1,2,\ldots,N,
+m = 1,\ldots,N;
 $$
 
-- para componentes com simetria ímpar:
+- para componentes com simetria impar em torno de `\theta = 0`,
 
 $$
-\theta_m = \frac{(m - N - 1/2)\pi}{2(N-1)},
+\theta_m =
+\frac{(m - N - 1/2)\pi}{2(N-1)},
 \qquad
-m = N+1, N+2, \ldots, 2N-1.
+m = N+1,\ldots,2N-1.
 $$
 
-Para razões de aspecto unitárias (a/b = 1), todos os pontos são escolhidos pela primeira fórmula, exceto os extremos.
+Para `a/b \neq 1`, Goell diz que todos os pontos seguem a primeira formula, exceto os primeiros e ultimos pontos do componente `z` impar, que sao omitidos.
 
----
+Comentario didatico: esta regra especial do caso `even` e uma das fontes mais provaveis de erro de implementacao. Vale sempre reler essa parte ao comparar o solver com o paper.
 
-## 2.3 Formulação dos Elementos de Matriz
+## 2.6 Formulacao Matricial
 
-Os coeficientes da equação (1) são obtidos pela correspondência dos campos elétricos e magnéticos tangenciais ao longo da fronteira do núcleo.
+As condicoes de contorno sao escritas em forma matricial. O artigo separa primeiro:
 
-Como cada campo possui componentes:
+- casamento longitudinal de `E_z`;
+- casamento longitudinal de `H_z`;
+- casamento tangencial de `E_t`;
+- casamento tangencial de `H_t`.
 
-- longitudinais  
-- transversais  
-
-existem quatro tipos de equações de correspondência.
-
-Para facilitar a análise computacional, essas equações são colocadas na forma matricial.
-
-As equações matriciais para os campos longitudinais são:
+As equacoes sao
 
 $$
 E^{LA} A = E^{LC} C,
 $$
 
-para o campo eletrico e
-
 $$
 H^{LB} B = H^{LD} D,
-$$  
-
-para o campo magnético.
+$$
 
 $$
 E^{TA} A + E^{TB} B = E^{TC} C + E^{TD} D,
@@ -209,82 +310,30 @@ $$
 H^{TA} A + H^{TB} B = H^{TC} C + H^{TD} D.
 $$
 
----
+Aqui `A`, `B`, `C` e `D` sao vetores-coluna contendo os coeficientes modais:
 
-As matrizes A, B, C e D são vetores coluna com N elementos dos coeficientes.
+- `a_n`
+- `b_n`
+- `c_n`
+- `d_n`
 
-Os elementos das matrizes são dados por:
+respectivamente.
 
-$$
-e_{mn}^{LA} = J S,
-$$
+## 2.7 Elementos Das Matrizes - Escritos De Forma Didatica
 
-$$
-e_{mn}^{LC} = K S,
-$$
+O scan do artigo e pouco amigavel na distincao entre barras e primas. Para fins de estudo, vale separar os termos em dois tipos:
 
-$$
-h_{mn}^{LB} = J C,
-$$
+- termos "radiais", vindos de derivadas radiais;
+- termos "angulares", vindos dos fatores `n/r`.
 
-$$
-h_{mn}^{LD} = K C,
-$$
-
-$$
-e_{mn}^{TA} = -k_z (\bar J' S R + \bar J C T),
-$$
-
-$$
-e_{mn}^{TB} = k_0 Z_0 (\bar J S R + \bar J' C T),
-$$
-
-$$
-e_{mn}^{TC} = k_z (\bar K' S R + \bar K C T),
-$$
-
-$$
-e_{mn}^{TD} = -k_0 Z_0 (\bar K S R + \bar K' C T),
-$$
-
-$$
-h_{mn}^{TA} = \frac{\epsilon_r k_0}{Z_0} (\bar J C R - J' S T),
-$$
-
-$$
-h_{mn}^{TB} = -k_z (\bar J' C R - \bar J S T),
-$$
-
-$$
-h_{mn}^{TC} = -\frac{k_0}{Z_0} (\bar K C R - \bar K' S T),
-$$
-
-$$
-h_{mn}^{TD} = k_z (\bar K' C R - \bar K S T).
-$$  
-
----
-
-onde:
-
-$$
-Z_0 = \left(\frac{\mu_0}{\epsilon_0}\right)^{1/2},
-\qquad
-\epsilon_r = \frac{\epsilon_1}{\epsilon_0}.
-$$
-
-e
+Adotaremos a notacao:
 
 $$
 S = \sin(n\theta_m + \phi),
 \qquad
-\phi = 0 \ \text{or} \ \frac{\pi}{2},
-$$
-
-$$
 C = \cos(n\theta_m + \phi),
 \qquad
-\phi = 0 \ \text{or} \ \frac{\pi}{2},
+\phi \in \left\{0,\frac{\pi}{2}\right\},
 $$
 
 $$
@@ -294,222 +343,201 @@ K = K_n(p r_m),
 $$
 
 $$
-J' = J_n'(h r_m),
+J_r = \frac{J_n'(h r_m)}{h},
 \qquad
-K' = K_n'(p r_m),
+K_r = \frac{K_n'(p r_m)}{p},
 $$
 
 $$
-\bar J = \frac{n J_n(h r_m)}{h^2 r_m},
+J_{\theta} = \frac{n J_n(h r_m)}{h^2 r_m},
 \qquad
-\bar K = \frac{n K_n(p r_m)}{p^2 r_m}.
+K_{\theta} = \frac{n K_n(p r_m)}{p^2 r_m},
 $$
 
 $$
-\bar J' = \frac{J_n'(h r_m)}{h},
+Z_0 = \sqrt{\frac{\mu_0}{\epsilon_0}},
 \qquad
-\bar K' = \frac{K_n'(p r_m)}{p},
+\epsilon_r = \frac{\epsilon_1}{\epsilon_0}.
 $$
 
-- derivadas indicadas por '  
+Com essa escolha, os blocos longitudinais ficam simples:
 
-e
+$$
+e_{mn}^{LA} = J S,
+\qquad
+e_{mn}^{LC} = K S,
+$$
 
-Para `\theta < \theta_c`,
+$$
+h_{mn}^{LB} = J C,
+\qquad
+h_{mn}^{LD} = K C.
+$$
+
+Ja os blocos tangenciais ficam
+
+$$
+e_{mn}^{TA} =
+-k_z \left(J_r S R + J_{\theta} C T\right),
+$$
+
+$$
+e_{mn}^{TB} =
+k_0 Z_0 \left(J_{\theta} S R + J_r C T\right),
+$$
+
+$$
+e_{mn}^{TC} =
+k_z \left(K_r S R + K_{\theta} C T\right),
+$$
+
+$$
+e_{mn}^{TD} =
+-k_0 Z_0 \left(K_{\theta} S R + K_r C T\right),
+$$
+
+$$
+h_{mn}^{TA} =
+\frac{\epsilon_r k_0}{Z_0}
+\left(J_{\theta} C R - J_r S T\right),
+$$
+
+$$
+h_{mn}^{TB} =
+-k_z \left(J_r C R - J_{\theta} S T\right),
+$$
+
+$$
+h_{mn}^{TC} =
+-\frac{k_0}{Z_0}
+\left(K_{\theta} C R - K_r S T\right),
+$$
+
+$$
+h_{mn}^{TD} =
+k_z \left(K_r C R - K_{\theta} S T\right).
+$$
+
+### Geometria local da fronteira
+
+Os fatores `R`, `T` e `r_m` dependem de qual lado da fronteira e atingido pelo raio de angulo `\theta_m`.
+
+Para `\theta_m < \theta_c`,
 
 $$
 R = \sin\theta_m,
 \qquad
 T = \cos\theta_m,
 \qquad
-r_m = (a/2) \cos\theta_m,
+r_m = \frac{a/2}{\cos\theta_m}.
 $$
 
-e para `\theta > \theta_c`,
+Para `\theta_m > \theta_c`,
 
 $$
 R = -\cos\theta_m,
 \qquad
 T = \sin\theta_m,
 \qquad
-r_m = (b/2) \sin\theta_m.
+r_m = \frac{b/2}{\sin\theta_m}.
 $$
 
-No canto `\theta = \theta_c`, o artigo assume que a fronteira e perpendicular a reta radial, obtendo
+Comentario didatico: esta escrita para `r_m` segue a interpretacao geometrica da intersecao do raio com a fronteira. Em scans e OCR, essa parte costuma aparecer truncada; por isso vale sempre compara-la com a implementacao real do solver.
 
-$$
-R = \cos\left(\theta_c + \frac{\pi}{4}\right),
-\qquad
-T = \cos\left(\theta_c - \frac{\pi}{4}\right),
-\qquad
-r_m = \frac{\sqrt{a^2 + b^2}}{4}.
-$$
+## 2.8 Designacao Dos Modos
 
----
+Guias dielectricos retangulares nao admitem, em geral, uma classificacao pura em TE e TM. Os modos sao mistos.
 
-## 2.4 Designação dos Modos
+Goell adota a nomenclatura `E_{mn}` e `H_{mn}` com base no limite de pequeno contraste de indice:
 
-Diferentemente de guias metálicos, os padrões de campo em guias dielétricos dependem de:
+- `E_{mn}` quando o campo eletrico transversal dominante tende a alinhar-se com `y`;
+- `H_{mn}` quando tende a alinhar-se com `x`.
 
-- diferença de índice de refração  
-- comprimento de onda  
-- razão de aspecto  
+Os indices `m` e `n` contam o numero de maximos aproximadamente visiveis nas direcoes `x` e `y`.
 
-Isso dificulta uma classificação simples.
+Comentario didatico: essa classificacao e util como rotulo fisico, mas nao deve ser confundida com um teorema de separacao estrita. Em guias dielectricos, os modos sao hibridos.
 
-Para guias metálicos:
+## 2.9 Diferencas Entre Campos Eletrico E Magnetico
 
-- modos são TE ou TM  
-- classificados por máximos em x e y  
+O artigo chama a atencao para um contraste com guias metalicos: em um guia dieletrico, os campos transversais `E_t` e `H_t` nao precisam ser ortogonais ponto a ponto.
 
-Para guias dielétricos:
-
-- modos não são puramente TE ou TM  
-
-A classificação adotada é baseada no limite de pequeno contraste de índice.
-
-Assim:
-
-- modos são denominados Eₘₙ ou Hₘₙ  
-- dependendo da direção dominante do campo elétrico  
-
-Onde:
-
-- m = número de máximos em x  
-- n = número de máximos em y  
-
----
-
-## 2.5 Diferenças entre Campos Elétrico e Magnético
-
-Para guias metálicos:
-
-- E_t e H_t têm comportamento similar  
-- impedância independe da posição  
-- fluxo de potência não muda de sinal  
-
-Para guias dielétricos:
-
-- campos não são semelhantes  
-- impedância depende da posição  
-
-Para que os campos transversais sejam perpendiculares:
+A condicao de ortogonalidade local seria
 
 $$
 E_t \cdot H_t = E_r H_r + E_{\theta} H_{\theta} = 0.
 $$
 
-A partir da equação (3):
+Mas, usando as expressoes dos campos transversais, Goell mostra que
 
 $$
-E_t \cdot H_t = \frac{k_z^2 - k^2}{k_z^2} \left( \frac{\partial H_z}{\partial r}\frac{\partial E_z}{\partial r} + \frac{1}{r^2} \frac{\partial H_z}{\partial \theta} \frac{\partial E_z}{\partial \theta}\right).
+E_t \cdot H_t =
+\frac{k^2 - k_z^2}{k_z^2}
+\left(
+\frac{\partial H_z}{\partial r}\frac{\partial E_z}{\partial r}
++
+\frac{1}{r^2}
+\frac{\partial H_z}{\partial \theta}
+\frac{\partial E_z}{\partial \theta}
+\right).
 $$
 
 Logo:
 
-- E_t e H_t não são necessariamente perpendiculares  
-- podem mudar de sinal  
-- pode ocorrer fluxo de potência negativo  
+- a impedancia transversal depende da posicao;
+- pode haver mudanca de sinal do fluxo de potencia;
+- os campos eletrico e magnetico nao sao "copias um do outro" como em guias metalicos ideais.
 
-Casos especiais onde isso não ocorre:
+Comentario didatico: esse ponto ajuda a entender por que os desenhos de linhas de campo e os padroes de intensidade do artigo sao mais ricos do que os de um guia metalico retangular.
 
-1. k ≈ k₁ ou k ≈ k₀  
-2. pequeno contraste de índice  
-3. simetria circular  
+## 2.10 Normalizacao
 
----
+Goell introduz variaveis normalizadas para que as curvas de propagacao fiquem pouco sensiveis ao contraste de indice quando `\Delta n_r` e pequeno.
 
-## 2.6 Normalização
-
-Os argumentos das funções de Bessel são:
-
-- h r = √(k₁² − k_z²) r  
-- p r = √(k_z² − k₀²) r  
-
-O primeiro pode ser escrito como:
+O artigo escreve a variavel de propagacao normalizada como
 
 $$
-h r = \left[k_1^2 - k_0^2 - p^2\right]^{1/2} r.
+P^2_{paper} =
+\frac{(k_z/k_0)^2 - 1}{n_r^2 - 1},
 $$
 
-Definindo:
+e define ainda uma quantidade radial normalizada
 
 $$
-P^2_{paper} = \frac{(k_z/k_0)^2 - 1}{n_r^2 - 1},
+\Omega = r k_0 \sqrt{n_r^2 - 1}.
+$$
+
+Com isso, os argumentos das funcoes especiais podem ser reescritos como
+
+$$
+p r = P_{paper}\,\Omega,
 $$
 
 $$
-\Omega = r k_0 (n_r^2 - 1)^{1/2},
+h r = \Omega \sqrt{1 - P^2_{paper}}.
 $$
 
-$$
-n_r = \left(\frac{k_1}{k_0}\right)^{1/2},
-$$
-
-onde n_r é o índice relativo.
-
-Então:
+Para as curvas, a variavel horizontal usada pelo artigo e
 
 $$
-p r = P_{paper}\Omega,
-$$
-
-$$
-h r = \Omega(1 - P^2_{paper})^{1/2}.
-$$
-
----
-
-As curvas da constante de propagação são expressas em termos de σ² e Ω:
-
-$$
-B_{paper} = \frac{2b}{\lambda_0}(n_r^2 - 1)^{1/2},
-$$
-
-onde λ₀ = 2π / k₀.
-
----
-
-Para pequenos valores de Δn:
-
-onde Δn = n_r − 1.
-
-Isso justifica o uso de σ² como variável de plotagem.
-
----
-
-A constante de propagação normalizada, σ², possui duas propriedades adicionais que tornam seu uso conveniente. Primeiro, seu intervalo de variação está em (0, 1). Segundo, para n_r ≈ 1:
-
-$$
-P^2_{paper}
-\approx
-\frac{k_z/k_0 - 1}{\Delta n_r},
+B_{paper} =
+\frac{2b}{\lambda_0}\sqrt{n_r^2 - 1},
 \qquad
-\Delta n_r = n_r - 1.
-$$  
+\lambda_0 = \frac{2\pi}{k_0}.
+$$
 
-onde Δn_r = n_r − 1; portanto, para pequenos valores de n_r, σ² é proporcional a k_z − k₀. Essa última propriedade é a razão pela qual σ², e não Ω, foi utilizada como variável de plotagem.
+No limite de pequena diferenca de indice, o artigo observa que a variavel vertical fica aproximadamente proporcional ao excesso de constante de propagacao em relacao ao meio externo. Em termos fisicos, isso faz dela uma excelente coordenada para visualizar o afastamento do modo em relacao ao corte.
 
----
+Comentario didatico: no codigo do repositorio, essas quantidades aparecem sobretudo como `B` e `Pprime`. O importante e saber que elas sao variaveis adimensionais construidas para tornar as curvas comparaveis entre diferentes guias.
 
-## 2.7 Método de Computação
+## 2.11 Equacao Matricial Global E Condicao Modal
 
-### 2.7.1 Constante de Propagação
-
-A equação (6) resulta em 4N equações lineares homogêneas simultâneas para os coeficientes aₙ, bₙ, cₙ e dₙ no caso de modos ímpares, e 4N − 2 equações para os modos pares, utilizando os pontos de correspondência previamente descritos.
-
-As equações podem ser combinadas para formar uma única equação matricial:
+As quatro familias de equacoes de contorno sao reunidas em uma unica equacao matricial
 
 $$
 [Q][T] = 0,
-$$  
+$$
 
-onde:
-
-- Q é a matriz do sistema  
-- T é o vetor coluna dos coeficientes  
-
-e
+com
 
 $$
 Q =
@@ -521,6 +549,8 @@ H^{TA} & H^{TB} & -H^{TC} & -H^{TD}
 \end{bmatrix},
 $$
 
+e
+
 $$
 [T] =
 \begin{bmatrix}
@@ -529,145 +559,71 @@ B \\
 C \\
 D
 \end{bmatrix}.
-$$  
-
-Todas as quantidades nas matrizes [Q] e [T] são, elas próprias, matrizes definidas pelas equações (1), (6) e (7).
-
-Para que exista uma solução não trivial da equação (18):
-
-$$
-\det[Q] = 0.
 $$
 
----
+Para existir uma solucao nao trivial, e necessario que
 
-A constante de propagação normalizada σ² foi obtida substituindo valores de teste na equação (19). Inicialmente, valores de σ² uniformemente distribuídos no intervalo (0, 1) foram utilizados para localizar aproximadamente as raízes. Em seguida, o método de Newton foi aplicado para encontrar as raízes com a precisão desejada.
+$$
+\det(Q) = 0.
+$$
 
-Em geral:
+Esta e a equacao modal do artigo.
 
-- uma iteração de Newton foi suficiente para curvas de propagação  
-- cerca de dez iterações foram necessárias para cálculos de padrões de campo  
+Comentario didatico: o problema inteiro foi reduzido a "para quais valores do parametro de propagacao essa matriz perde posto?". Essa e a pergunta numerica que o solver implementa.
 
----
+## 2.12 Metodo De Computacao
 
-Tanto o método simples de triangulação quanto o método mais complexo de condensação por pivô de Gauss foram utilizados para avaliar o determinante.
+Goell descreve um fluxo computacional muito claro.
 
-- O método de triangulação foi usado na maioria dos casos  
-- O método de Gauss foi usado quando erros de arredondamento eram relevantes  
+### Para encontrar a constante de propagacao
 
-Em todos os casos, foi utilizada aritmética de dupla precisão.
+1. amostrar valores-teste da variavel normalizada em `(0,1)`;
+2. localizar aproximadamente as raizes de `det(Q)`;
+3. refinar as raizes pelo metodo de Newton.
 
-Para cinco harmônicos espaciais:
+O artigo comenta que, em geral:
 
-- cerca de 0,1 s de tempo computacional (IBM 360/65) por valor de σ²  
+- uma iteracao de Newton bastava para curvas de propagacao;
+- cerca de dez iteracoes eram usadas quando se desejavam padroes de campo mais precisos.
 
----
+### Para avaliar o determinante
 
-Devido à ampla faixa dinâmica dos coeficientes, medidas foram tomadas para evitar:
+Foram usados:
 
-- underflow  
-- overflow  
-- erros de arredondamento  
+- triangulacao simples, na maior parte dos casos;
+- condensacao por pivoteamento de Gauss, quando o arredondamento se tornava preocupante.
 
-Multiplicar uma linha ou coluna da matriz por uma constante é equivalente a multiplicar o determinante por essa constante. Assim, qualquer linha ou coluna pode ser escalada sem alterar os zeros do determinante.
+### Para controlar a faixa dinamica numerica
 
-Embora exista uma teoria mais refinada para escolher as “melhores funções”, foi utilizado um método direto (“força bruta”), pois os métodos mais sofisticados aumentariam significativamente a complexidade do programa.
+O artigo comenta que linhas e colunas da matriz podiam ser reescaladas por fatores positivos sem deslocar os zeros do determinante. Essa observacao e teoricamente correta e continua sendo relevante em implementacoes modernas.
 
-Verificou-se que:
+Observacao do repositorio: a passagem da pagina 2144 que descreve o reescalonamento exato continua sendo a parte menos nitida do scan. A ideia fisica, no entanto, e clara: manter os blocos da matriz em uma faixa numerica razoavel sem alterar os zeros de `det(Q)`.
 
-- termos de Bessel → multiplicados por h²d / |Jₙ(hb)|  
-- termos de Bessel modificados → multiplicados por p²d / Kₙ(pb)  
+## 2.13 Como Os Padroes De Campo Sao Reconstruidos
 
-onde d é a média das dimensões do guia de onda
+Depois que a raiz modal e encontrada:
 
-Isso manteve os termos sob controle numérico.
+1. substitui-se esse valor em `Q`;
+2. fixa-se um coeficiente do vetor `T`;
+3. resolvem-se os demais coeficientes por algebra linear;
+4. reconstrui-se o campo em uma malha do plano transversal.
 
-Uma simplificação adicional foi feita definindo:
+O artigo descreve entao:
 
-- Z₀ = 1  
+- cortes radiais;
+- isolinhas;
+- figuras de intensidade;
+- desenhos de linhas de campo.
 
-o que não altera os zeros do determinante.
+Comentario didatico: essa parte e importante porque mostra que o metodo nao entrega apenas "um numero". Ele entrega tambem a estrutura espacial do modo, isto e, a parte mais fisicamente rica do problema.
 
----
+## O Que O Aluno Deve Guardar Desta Secao
 
-### 2.7.2 Configurações dos Modos
+- O metodo usa `E_z` e `H_z` como variaveis geradoras.
+- A base radial e composta por Bessel no nucleo e Bessel modificada no exterior.
+- A simetria reduz o problema a classes `odd/even` e `phi0/phi90`.
+- A fronteira retangular entra pelos pontos de casamento.
+- O resultado final e uma matriz `Q` cujo determinante deve se anular.
+- As curvas de propagacao e os padroes de campo saem da mesma estrutura matematica.
 
-Os campos elétricos e magnéticos foram calculados para casos representativos a partir da equação (3).
-
-Para encontrar os coeficientes:
-
-- primeiro calcula-se k_z pela equação (19)  
-- depois substitui-se em (18)  
-
-Ao fixar um dos elementos do vetor T como 1, os demais são obtidos por técnicas padrão de álgebra linear.
-
----
-
-Diversas abordagens foram utilizadas para obter os padrões de campo:
-
-- cálculo dos campos ao longo de cortes radiais  
-- geração de isolinhas (direção do campo elétrico)  
-- imagens dos modos geradas por computador  
-
----
-
-As isolinhas e figuras foram desenhadas utilizando um plotter simulado Stromberg-Carlson SC-4020:
-
-- resolução: 1024 × 1024  
-- apenas um quadrante foi utilizado (simetria)  
-
-As dimensões foram escaladas de modo que:
-
-- o lado maior ocupasse 80% da largura  
-
-Os pontos utilizados foram:
-
-- (20m, 20n), com m, n = 0 até 49  
-
----
-
-As isolinhas foram desenhadas traçando linhas paralelas ao campo elétrico em cada ponto (todas com o mesmo comprimento). Essas figuras serviram como base para os desenhos finais das linhas de campo.
-
----
-
-Para gerar imagens dos modos:
-
-- calculou-se a densidade de potência em cada ponto  
-- utilizou-se a raiz quadrada da densidade de potência  
-- normalizou-se pelo valor máximo  
-- quantizou-se em 21 níveis  
-
-Cada ponto foi representado por uma porção da figura correspondente ao nível quantizado.
-
-Nos pontos onde a potência era zero:
-
-- nenhum traçado foi feito  
-
----
-
-Como o tamanho do ponto do CRT era aproximadamente igual ao espaçamento das linhas:
-
-- as figuras resultantes ficaram preenchidas  
-
-Assim:
-
-- a intensidade luminosa ≈ densidade de potência
-
----
-
-Para pequenas diferenças de índice:
-
-- densidade de potência ∝ |E_t|²  
-- faixa dinâmica ≈ 400  
-
----
-
-As figuras completas foram obtidas a partir de um único quadrante:
-
-- exposição quadruplicada do microfilme  
-
-Tempo de computação:
-
-- entre 30 e 60 segundos (IBM 360/65) por figura  
-
----
+Em outras palavras: a Secao II do artigo nao e apenas "a derivacao". Ela e o projeto completo do solver.

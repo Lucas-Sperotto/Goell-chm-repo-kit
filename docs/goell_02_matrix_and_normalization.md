@@ -1,126 +1,283 @@
 # Goell 1969 - Elementos De Matriz, Determinante Global E Normalizacao
 
-Estas notas reescrevem as equacoes do artigo que alimentam diretamente a montagem da matriz `Q`, a normalizacao usada nas curvas de propagacao e a busca das raizes nas Secoes 2.3, 2.6 e 2.7.
+Este arquivo reune as equacoes da Secao 2.3 em diante que entram diretamente na montagem da matriz `Q` e na construcao das curvas de propagacao.
 
-## Equacoes De Casamento Em Forma Matricial
+## 1. Equacoes De Casamento Em Forma Matricial
 
-Equacoes (6a)-(6d):
+As condicoes de contorno sao agrupadas como:
 
-Para o campo eletrico longitudinal,
+$$
+E^{LA} A = E^{LC} C,
+$$
 
-para o campo magnetico longitudinal,
+$$
+H^{LB} B = H^{LD} D,
+$$
 
-para o campo eletrico tangencial,
+$$
+E^{TA} A + E^{TB} B = E^{TC} C + E^{TD} D,
+$$
 
-e para o campo magnetico tangencial,
+$$
+H^{TA} A + H^{TB} B = H^{TC} C + H^{TD} D.
+$$
 
-Aqui `A`, `B`, `C` e `D` sao vetores-coluna contendo os coeficientes modais `a_n`, `b_n`, `c_n` e `d_n`.
+Aqui `A`, `B`, `C` e `D` sao vetores-coluna de coeficientes modais.
 
-## Definicoes Usadas Nos Elementos De Matriz
+## 2. Notacao Compacta Para Os Elementos
 
-Na p. 2140, o artigo define:
+Para evitar a ambiguidade visual do scan entre barras e primas, estas notas separam explicitamente os termos radiais e angulares.
 
-e, para distinguir dos derivados radiais acima, eu mantenho os fatores angulares com barra:
+Definimos:
 
-O artigo tambem define
+$$
+S = \sin(n\theta_m + \phi),
+\qquad
+C = \cos(n\theta_m + \phi),
+$$
 
-Na implementacao, estas quantidades aparecem de forma mais transparente se pensarmos assim:
+$$
+J = J_n(h r_m),
+\qquad
+K = K_n(p r_m),
+$$
 
-- `J` e `K` entram nos blocos longitudinais;
-- `\bar J'` e `\bar K'` representam os termos derivados que alimentam os blocos tangenciais;
-- `\bar J` e `\bar K` representam os termos angulares proporcionais a `n/r_m`.
+$$
+J_r = \frac{J_n'(h r_m)}{h},
+\qquad
+K_r = \frac{K_n'(p r_m)}{p},
+$$
 
-## Fatores Geometricos Da Fronteira
+$$
+J_{\theta} = \frac{n J_n(h r_m)}{h^2 r_m},
+\qquad
+K_{\theta} = \frac{n K_n(p r_m)}{p^2 r_m},
+$$
 
-## Elementos De Matriz
+$$
+Z_0 = \sqrt{\frac{\mu_0}{\epsilon_0}},
+\qquad
+\epsilon_r = \frac{\epsilon_1}{\epsilon_0}.
+$$
 
-Equacoes (7a)-(7l):
+## 3. Blocos Longitudinais
 
-Observacao pratica para o codigo:
+Os elementos dos blocos longitudinais sao:
 
-- as equacoes acima sao a referencia direta para os blocos preenchidos em `src/goell_q_solver.cpp`;
-- quando o solver normaliza tudo por `k_0` e depois toma `Z_0 = 1`, os mesmos blocos aparecem com fatores reduzidos, mas preservando os zeros de `\det(Q)`.
+$$
+e_{mn}^{LA} = J S,
+\qquad
+e_{mn}^{LC} = K S,
+$$
 
-## Nota Sobre Ortogonalidade Dos Campos Transversais
+$$
+h_{mn}^{LB} = J C,
+\qquad
+h_{mn}^{LD} = K C.
+$$
 
-Equacoes (8)-(9):
+Esses blocos codificam diretamente o casamento de `E_z` e `H_z`.
 
-Os campos transversais sao ortogonais somente quando
+## 4. Blocos Tangenciais
 
-Usando a eq. (3), o artigo escreve
+Os blocos tangenciais sao:
 
-Isso nao entra diretamente na busca de raizes, mas e importante quando formos voltar aos perfis de campo.
+$$
+e_{mn}^{TA} =
+-k_z \left(J_r S R + J_{\theta} C T\right),
+$$
 
-## Normalizacao
+$$
+e_{mn}^{TB} =
+k_0 Z_0 \left(J_{\theta} S R + J_r C T\right),
+$$
 
-Eq. (10):
+$$
+e_{mn}^{TC} =
+k_z \left(K_r S R + K_{\theta} C T\right),
+$$
 
-Em seguida o artigo introduz a quantidade de propagacao normalizada e a quantidade radial normalizada.
+$$
+e_{mn}^{TD} =
+-k_0 Z_0 \left(K_{\theta} S R + K_r C T\right),
+$$
 
-Para deixar a ligacao com o repositorio explicita:
+$$
+h_{mn}^{TA} =
+\frac{\epsilon_r k_0}{Z_0}
+\left(J_{\theta} C R - J_r S T\right),
+$$
 
-- eu uso `P^2_paper` para a quantidade do eixo vertical;
-- e `P_paper = \sqrt{P^2_paper}` para a versao sem quadrado.
+$$
+h_{mn}^{TB} =
+-k_z \left(J_r C R - J_{\theta} S T\right),
+$$
 
-Eq. (11):
+$$
+h_{mn}^{TC} =
+-\frac{k_0}{Z_0}
+\left(K_{\theta} C R - K_r S T\right),
+$$
 
-Eq. (12):
+$$
+h_{mn}^{TD} =
+k_z \left(K_r C R - K_{\theta} S T\right).
+$$
 
-Eq. (13):
+Interpretacao:
 
-e, portanto,
+- os termos com `J_r` e `K_r` vem das derivadas radiais;
+- os termos com `J_{\theta}` e `K_{\theta}` vem das derivadas angulares;
+- `R` e `T` projetam o campo sobre a tangente local da fronteira.
 
-Para as curvas de propagacao, o artigo usa como variavel horizontal
+## 5. Fatores Geometricos Da Fronteira
 
-com `\lambda_0 = 2\pi/k_0`.
+Para `\theta_m < \theta_c`,
 
-Para pequena diferenca de indice, o artigo tambem fornece
+$$
+R = \sin\theta_m,
+\qquad
+T = \cos\theta_m,
+\qquad
+r_m = \frac{a/2}{\cos\theta_m}.
+$$
 
-Na implementacao, isso aparece assim:
+Para `\theta_m > \theta_c`,
 
-- `B` controla a varredura horizontal da curva;
-- `Pprime` guarda a variavel vertical normalizada;
-- os argumentos de Bessel sao montados a partir de `B`, `Pprime` e do `r_m` normalizado.
+$$
+R = -\cos\theta_m,
+\qquad
+T = \sin\theta_m,
+\qquad
+r_m = \frac{b/2}{\sin\theta_m}.
+$$
 
-## Equacao Matricial Global
+Estas formulas sao particularmente importantes no repositorio porque uma leitura geometrica incorreta da fronteira altera sensivelmente as raizes obtidas.
 
-Eq. (18):
+## 6. Ortogonalidade Dos Campos Transversais
+
+O artigo lembra que os campos transversais nao precisam ser ortogonais ponto a ponto. A condicao local de ortogonalidade seria
+
+$$
+E_t \cdot H_t = E_r H_r + E_{\theta} H_{\theta} = 0.
+$$
+
+Mas, em geral,
+
+$$
+E_t \cdot H_t =
+\frac{k^2 - k_z^2}{k_z^2}
+\left(
+\frac{\partial H_z}{\partial r}\frac{\partial E_z}{\partial r}
++
+\frac{1}{r^2}
+\frac{\partial H_z}{\partial \theta}
+\frac{\partial E_z}{\partial \theta}
+\right).
+$$
+
+Isso explica por que os perfis de campo em guias dielectricos sao mais ricos do que nos casos metalicos ideais.
+
+## 7. Normalizacao
+
+O artigo introduz uma variavel de propagacao normalizada:
+
+$$
+P^2_{paper} =
+\frac{(k_z/k_0)^2 - 1}{n_r^2 - 1},
+$$
+
+e uma coordenada radial normalizada:
+
+$$
+\Omega = r k_0 \sqrt{n_r^2 - 1}.
+$$
+
+Disso seguem:
+
+$$
+p r = P_{paper}\,\Omega,
+$$
+
+$$
+h r = \Omega \sqrt{1 - P^2_{paper}}.
+$$
+
+Para as curvas de propagacao, a variavel horizontal e
+
+$$
+B_{paper} =
+\frac{2b}{\lambda_0}\sqrt{n_r^2 - 1},
+\qquad
+\lambda_0 = \frac{2\pi}{k_0}.
+$$
+
+No limite de pequeno contraste de indice, `P^2_{paper}` mede aproximadamente o afastamento de `k_z` em relacao a `k_0`, e por isso e uma coordenada de plotagem muito conveniente.
+
+## 8. Equacao Matricial Global
+
+As quatro familias de equacoes sao reunidas em
+
+$$
+[Q][T] = 0,
+$$
 
 com
 
+$$
+Q =
+\begin{bmatrix}
+E^{LA} & 0      & -E^{LC} & 0 \\
+0      & H^{LB} & 0       & -H^{LD} \\
+E^{TA} & E^{TB} & -E^{TC} & -E^{TD} \\
+H^{TA} & H^{TB} & -H^{TC} & -H^{TD}
+\end{bmatrix},
+$$
+
 e
 
-A condicao modal e entao
-
-## Observacoes Da Busca De Raizes Na Secao 2.7.1
-
-O artigo informa que:
-
-1. valores-teste da variavel de propagacao normalizada foram amostrados uniformemente em `(0, 1)`;
-2. o metodo de Newton foi usado em seguida para refinar as raizes;
-3. nas curvas de propagacao, em geral uma iteracao de Newton era suficiente;
-4. com cinco harmonicos, cada avaliacao do determinante levava cerca de `0.1 s` em um IBM 360/65.
-
-## Nota De Escalonamento Da Pagina 2144
-
-Para controlar underflow e overflow, o artigo observa que linhas ou colunas do determinante podem ser multiplicadas por funcoes positivas sem deslocar seus zeros.
-
-O texto diz que foi usado um escalonamento bruto:
-
-- termos de Bessel multiplicados por
-
 $$
-\frac{h^d d}{\left|J_n(h b)\right|},
+[T] =
+\begin{bmatrix}
+A \\
+B \\
+C \\
+D
+\end{bmatrix}.
 $$
 
-- termos de Bessel modificado multiplicados por
+A condicao modal e
 
 $$
-\frac{p^d d}{K_n(p b)},
+\det(Q) = 0.
 $$
 
-onde `d` e a dimensao media do guia.
+## 9. Busca De Raizes
 
-O artigo tambem afirma que `Z_0` foi entao fixado em unidade, pois isso nao desloca os zeros do determinante.
+Goell descreve o procedimento numerico da seguinte forma:
 
-Este e o unico trecho destas notas que ainda deve ser tratado com cautela: o scan dessa passagem continua sendo a parte menos segura da extracao.
+1. amostrar a variavel normalizada em `(0,1)`;
+2. localizar aproximadamente as raizes;
+3. refinar com Newton.
+
+Com cinco harmonicos espaciais, o artigo relata cerca de `0.1 s` por avaliacao do determinante em um IBM 360/65.
+
+## 10. Nota Sobre Reescalonamento
+
+O artigo observa que linhas e colunas da matriz podem ser multiplicadas por fatores positivos sem deslocar os zeros do determinante. Isso permite controlar:
+
+- underflow;
+- overflow;
+- perda de significancia numerica.
+
+A forma exata do reescalonamento descrito na p. 2144 continua sendo o trecho menos nitido do scan. A ideia central, porem, e clara: melhorar o condicionamento numerico sem mudar a posicao das raizes.
+
+## 11. Como Este Arquivo Deve Ser Usado
+
+Use este arquivo quando a pergunta for:
+
+- "qual e exatamente a estrutura de `Q`?"
+- "que combinacao de derivadas entra em cada bloco?"
+- "como `B` e `Pprime` se relacionam com as variaveis do artigo?"
+
+Para a interpretacao fisica e a narrativa completa, a leitura principal continua sendo [02_deriv.md](./02_deriv.md).

@@ -1,71 +1,83 @@
-# Goell 1969 - Checklist De Revisao Cruzada Com O PDF
+# Goell 1969 - Roteiro De Conferencia E Pontos Delicados
 
-Este arquivo e curto de proposito. A ideia e usalo lado a lado com as equacoes renderizadas em:
+Este arquivo existe para quem quiser revisar o PDF em paralelo com as notas do repositorio. Ele nao e uma lista de "erros", mas um mapa dos pontos em que leitura de scan, notacao matematica e implementacao tendem a se desencontrar.
 
-- [goell_01_field_expansions.md](./goell_01_field_expansions.md)
-- [goell_02_matrix_and_normalization.md](./goell_02_matrix_and_normalization.md)
+## 1. Glifos Das Variaveis Normalizadas
 
-## Itens Prioritarios Para Conferencia No Scan
+Conferir no PDF:
 
-1. Confirmar o glifo exato usado para a variavel vertical da eq. (11) e para o eixo vertical das Figs. 16-22.
-   No repositorio ela aparece como `Pprime`, mas nas notas foi nomeada como `P^2_paper`.
+- o glifo exato da variavel vertical da eq. (11) e das Figuras 16 a 22;
+- o glifo exato da variavel horizontal da eq. (16) e das Figuras 16 a 22.
 
-2. Confirmar o glifo exato usado para a variavel horizontal da eq. (16) e para o eixo horizontal das Figs. 16-22.
-   No repositorio ela aparece como `B`, mas o scan pode se parecer com beta ou com um `B` estilizado.
+Nas notas do repositorio, usamos:
 
-3. Confirmar a afirmacao da Secao 2.1 sobre as familias de fase:
+- `P^2_paper` para a variavel vertical;
+- `B_paper` para a variavel horizontal.
 
-   - primeiro tipo: `\phi_n = 0`, `\psi_n = \pi/2`
-   - segundo tipo: `\phi_n = \pi/2`, `\psi_n = \pi`
+No codigo, essas quantidades aparecem sobretudo como:
 
-4. Confirmar se as definicoes de `S` e `C` na p. 2140 usam mesmo o mesmo parametro `\phi` para ambas:
+- `Pprime`
+- `B`
 
-   $$
-   S = \sin(n\theta_m + \phi),
-   \qquad
-   C = \cos(n\theta_m + \phi),
-   \qquad
-   \phi = 0 \ \text{or} \ \pi/2.
-   $$
+## 2. Familias De Fase
 
-5. Confirmar os sinais em `(7e)`-(`7l`), especialmente:
+Conferir se o artigo efetivamente fixa:
 
-   - o sinal de menos na frente de `(7e)`
-   - o fator `k_0 Z_0` em `(7f)` e `(7h)`
-   - o fator `\epsilon_r k_0 / Z_0` em `(7i)`
-   - o sinal de menos na frente de `(7k)`
+$$
+\phi_n = 0,
+\qquad
+\psi_n = \frac{\pi}{2},
+$$
 
-6. Confirmar as definicoes dos fatores angulares:
+e
 
-   $$
-   \bar J = \frac{n J_n(h r_m)}{h^2 r_m},
-   \qquad
-   \bar K = \frac{n K_n(p r_m)}{p^2 r_m}.
-   $$
+$$
+\phi_n = \frac{\pi}{2},
+\qquad
+\psi_n = \pi.
+$$
 
-7. Confirmar os fatores geometricos por trechos:
+Este ponto e importante porque ele gera, no solver, as familias `phi0` e `phi90`.
 
-   - para `\theta < \theta_c`:
-     `R = \sin\theta_m`, `T = \cos\theta_m`, `r_m = (a/2)\cos\theta_m`
-   - para `\theta > \theta_c`:
-     `R = -\cos\theta_m`, `T = \sin\theta_m`, `r_m = (b/2)\sin\theta_m`
+## 3. Paridade Dos Harmonicos
 
-8. Confirmar a regra especial da Secao 2.2 para harmonicos pares quando `a/b \neq 1`:
+Conferir na Secao 2.1 que:
 
-   - todos os pontos seguem a primeira formula,
-   - exceto os primeiros e ultimos pontos do componente `z` impar, que sao omitidos.
+- modos de uma classe usam apenas harmonicos impares;
+- modos da outra classe usam apenas harmonicos pares.
 
-9. Confirmar a estrutura em blocos de `Q` na eq. (18), especialmente os sinais de menos na terceira e quarta linhas de blocos.
+Isto e o que justifica a divisao `odd/even`.
 
-10. Confirmar as formulas de escalonamento da p. 2144.
-    Este continua sendo o trecho menos confiavel da extracao.
+## 4. Regra Especial Do Caso `even`
 
-## Como Usar Este Checklist
+Conferir com cuidado a regra da Secao 2.2 para `a/b \neq 1`:
 
-Se voltarmos a revisar o PDF no futuro, o loop mais simples e:
+- todos os pontos seguem a primeira formula;
+- exceto os dois extremos do componente `z` impar, que sao omitidos.
 
-- marcar qualquer item simbolicamente errado;
-- marcar qualquer item numericamente equivalente, mas escrito de forma diferente do artigo;
-- marcar qualquer glifo cujo nome deva mudar para bater com o paper.
+Este e um dos lugares mais sensiveis da implementacao.
 
-Depois dessa passada, o proximo ajuste natural e levar a versao final das equacoes para dentro do solver e dos scripts de plot.
+## 5. Estrutura Em Blocos Da Matriz `Q`
+
+Conferir na eq. (18):
+
+- os sinais de menos nos blocos externos;
+- a disposicao exata das quatro linhas de blocos;
+- a correspondencia entre os blocos longitudinais e tangenciais.
+
+## 6. Reescalonamento Da Pagina 2144
+
+Este continua sendo o trecho mais dificil de ler no scan. O que importa conferir e:
+
+- se os fatores de reescalonamento foram copiados corretamente;
+- se o papel deles e apenas numerico, sem deslocar os zeros de `det(Q)`.
+
+## 7. Como Usar Este Arquivo
+
+Quando surgir uma divergencia entre PDF, notas e codigo, siga esta ordem:
+
+1. conferir o glifo ou sinal no PDF;
+2. conferir a versao resumida das equacoes em [goell_01_field_expansions.md](./goell_01_field_expansions.md) e [goell_02_matrix_and_normalization.md](./goell_02_matrix_and_normalization.md);
+3. so depois mexer na implementacao.
+
+Esse procedimento evita um erro muito comum em reproducao numerica: ajustar o codigo para compensar uma leitura equivocada do artigo.
