@@ -1,5 +1,7 @@
 # Goell 1969 - Roteiro De Conferencia E Pontos Delicados
 
+_Navegacao: [README geral](../../README.md) | [Indice de docs](../README.md) | [Referencia anterior](02_matriz_global_e_normalizacao.md) | [Proxima referencia](04_notas_sobre_a_tabela_1.md)_
+
 Este arquivo existe para quem quiser revisar o PDF em paralelo com as notas do repositorio. Ele nao e uma lista de "erros", mas um mapa dos pontos em que leitura de scan, notacao matematica e implementacao tendem a se desencontrar.
 
 ## 1. Glifos Das Variaveis Normalizadas
@@ -77,7 +79,9 @@ Este continua sendo o trecho mais dificil de ler no scan. O que importa conferir
 Quando surgir uma divergencia entre PDF, notas e codigo, siga esta ordem:
 
 1. conferir o glifo ou sinal no PDF;
-2. conferir a versao resumida das equacoes em [goell_01_field_expansions.md](./goell_01_field_expansions.md) e [goell_02_matrix_and_normalization.md](./goell_02_matrix_and_normalization.md);
+2. conferir a versao resumida das equacoes em [01_expansoes_de_campo.md](01_expansoes_de_campo.md) e [02_matriz_global_e_normalizacao.md](02_matriz_global_e_normalizacao.md);
 3. so depois mexer na implementacao.
 
 Esse procedimento evita um erro muito comum em reproducao numerica: ajustar o codigo para compensar uma leitura equivocada do artigo.
+
+_Continua em: [04_notas_sobre_a_tabela_1.md](04_notas_sobre_a_tabela_1.md) | [Indice de docs](../README.md)_

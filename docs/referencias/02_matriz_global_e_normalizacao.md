@@ -1,5 +1,7 @@
 # Goell 1969 - Elementos De Matriz, Determinante Global E Normalizacao
 
+_Navegacao: [README geral](../../README.md) | [Indice de docs](../README.md) | [Referencia anterior](01_expansoes_de_campo.md) | [Proxima referencia](03_checklist_de_conferencia.md)_
+
 Este arquivo reune as equacoes da Secao 2.3 em diante que entram diretamente na montagem da matriz `Q` e na construcao das curvas de propagacao.
 
 ## 1. Equacoes De Casamento Em Forma Matricial
@@ -280,4 +282,6 @@ Use este arquivo quando a pergunta for:
 - "que combinacao de derivadas entra em cada bloco?"
 - "como `B` e `Pprime` se relacionam com as variaveis do artigo?"
 
-Para a interpretacao fisica e a narrativa completa, a leitura principal continua sendo [02_deriv.md](./02_deriv.md).
+Para a interpretacao fisica e a narrativa completa, a leitura principal continua sendo [../02_derivacao_das_equacoes.md](../02_derivacao_das_equacoes.md).
+
+_Continua em: [03_checklist_de_conferencia.md](03_checklist_de_conferencia.md) | [Indice de docs](../README.md)_

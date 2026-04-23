@@ -1,6 +1,8 @@
 # Goell 1969 - Expansoes De Campo, Simetria E Pontos De Casamento
 
-Este arquivo e uma folha de referencia rapida para as Secoes 2.1 e 2.2 do artigo. A ideia nao e substituir a leitura guiada de [02_deriv.md](./02_deriv.md), mas reunir em um so lugar as expressoes que entram diretamente na implementacao.
+_Navegacao: [README geral](../../README.md) | [Indice de docs](../README.md) | [Proxima referencia](02_matriz_global_e_normalizacao.md)_
+
+Este arquivo e uma folha de referencia rapida para as Secoes 2.1 e 2.2 do artigo. A ideia nao e substituir a leitura principal de [../02_derivacao_das_equacoes.md](../02_derivacao_das_equacoes.md), mas reunir em um so lugar as expressoes que entram diretamente na implementacao.
 
 ## 1. Geometria
 
@@ -227,4 +229,6 @@ Estas definicoes entram diretamente em:
 - geracao dos pontos de contorno;
 - montagem dos blocos da matriz `Q`.
 
-Se houver duvida na implementacao, este arquivo deve ser lido em conjunto com [goell_02_matrix_and_normalization.md](./goell_02_matrix_and_normalization.md).
+Se houver duvida na implementacao, este arquivo deve ser lido em conjunto com [02_matriz_global_e_normalizacao.md](02_matriz_global_e_normalizacao.md).
+
+_Continua em: [02_matriz_global_e_normalizacao.md](02_matriz_global_e_normalizacao.md) | [Indice de docs](../README.md)_

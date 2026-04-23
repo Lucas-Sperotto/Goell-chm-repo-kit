@@ -1,5 +1,7 @@
 # Tabela I - Nota Do Repositorio Sobre A Variacao Residual
 
+_Navegacao: [README geral](../../README.md) | [Indice de docs](../README.md) | [Referencia anterior](03_checklist_de_conferencia.md) | [TODO do projeto](../../TODO.md)_
+
 Este arquivo nao e uma traducao do artigo. Ele registra o que aprendemos ao tentar reproduzir numericamente a Tabela I com o solver deste repositorio.
 
 ## O Que A Tabela I Mede No Artigo
@@ -84,3 +86,5 @@ No estado atual do repositorio, a primeira parte melhorou bastante. A segunda ai
 - usar a Tabela I nao apenas como teste de "valor numerico", mas como teste de identificacao modal consistente.
 
 Esta e, portanto, uma nota do repositorio sobre reproducao numerica, e nao parte da traducao do artigo em si.
+
+_Relacionada a: [TODO.md](../../TODO.md) | [Indice de docs](../README.md)_

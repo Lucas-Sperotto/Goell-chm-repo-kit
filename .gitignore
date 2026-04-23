@@ -5,8 +5,7 @@
 /out/**
 /figures/
 /figures/**
-/data/
-/data/**
+.codex
 *.o
 *.obj
 *.exe

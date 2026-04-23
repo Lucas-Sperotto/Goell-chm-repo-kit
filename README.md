@@ -39,20 +39,28 @@ Este repositorio foi montado justamente para tornar esse caminho legivel, verifi
 
 ### Documentacao
 
-Os arquivos em `docs/` formam uma trilha de estudo do artigo.
+O centro da documentacao agora e [docs/README.md](docs/README.md), que organiza a traducao principal, as notas permanentes de apoio e os links para o PDF.
 
-- [docs/00_resumo.md](docs/00_resumo.md): mapa geral do problema, do metodo e do papel do repositorio.
-- [docs/01_intro.md](docs/01_intro.md): leitura comentada da introducao.
-- [docs/02_deriv.md](docs/02_deriv.md): derivacao guiada da teoria, com comentarios fisicos e numericos.
-- [docs/03_result.md](docs/03_result.md): leitura da secao de resultados, com destaque para Tabela I e Figs. 16-22.
-- [docs/04_conclusions.md](docs/04_conclusions.md): conclusoes do artigo com comentario critico.
+Trilha principal:
+
+- [docs/00_titulo_resumo.md](docs/00_titulo_resumo.md): titulo, resumo e referencia bibliografica do artigo.
+- [docs/01_introducao.md](docs/01_introducao.md): traducao da introducao.
+- [docs/02_derivacao_das_equacoes.md](docs/02_derivacao_das_equacoes.md): inicio da Secao II, com expansoes e campos tangenciais.
+- [docs/02.1_efeitos_da_simetria.md](docs/02.1_efeitos_da_simetria.md) a [docs/02.7_metodo_de_computacao.md](docs/02.7_metodo_de_computacao.md): desdobramento completo da teoria e do metodo numerico.
+- [docs/03_resultados_do_calculo.md](docs/03_resultados_do_calculo.md): abertura da Secao III e Tabela I.
+- [docs/03.1_precisao.md](docs/03.1_precisao.md), [docs/03.2_configuracoes_modais.md](docs/03.2_configuracoes_modais.md) e [docs/03.3_curvas_de_propagacao.md](docs/03.3_curvas_de_propagacao.md): resultados, figuras e curvas de propagacao.
+- [docs/04_conclusoes.md](docs/04_conclusoes.md), [docs/05_agradecimentos.md](docs/05_agradecimentos.md) e [docs/06_referencias.md](docs/06_referencias.md): fechamento do artigo.
 
 Como referencia rapida:
 
-- [docs/goell_01_field_expansions.md](docs/goell_01_field_expansions.md)
-- [docs/goell_02_matrix_and_normalization.md](docs/goell_02_matrix_and_normalization.md)
-- [docs/goell_03_review_checklist.md](docs/goell_03_review_checklist.md)
-- [docs/table1_variation_notes.md](docs/table1_variation_notes.md)
+- [docs/referencias/01_expansoes_de_campo.md](docs/referencias/01_expansoes_de_campo.md)
+- [docs/referencias/02_matriz_global_e_normalizacao.md](docs/referencias/02_matriz_global_e_normalizacao.md)
+- [docs/referencias/03_checklist_de_conferencia.md](docs/referencias/03_checklist_de_conferencia.md)
+- [docs/referencias/04_notas_sobre_a_tabela_1.md](docs/referencias/04_notas_sobre_a_tabela_1.md)
+
+Pendencias do projeto:
+
+- [TODO.md](TODO.md)
 
 ### PDF De Referencia
 
@@ -160,18 +168,19 @@ A Tabela I tem sido especialmente util porque ela testa a convergencia em funcao
 
 Se voce estiver chegando agora, a ordem recomendada e:
 
-1. [docs/00_resumo.md](docs/00_resumo.md)
-2. [docs/01_intro.md](docs/01_intro.md)
-3. [docs/02_deriv.md](docs/02_deriv.md)
-4. [docs/03_result.md](docs/03_result.md)
-5. [src/goell_q_solver.cpp](src/goell_q_solver.cpp)
+1. [docs/README.md](docs/README.md)
+2. [docs/00_titulo_resumo.md](docs/00_titulo_resumo.md)
+3. [docs/01_introducao.md](docs/01_introducao.md)
+4. [docs/02_derivacao_das_equacoes.md](docs/02_derivacao_das_equacoes.md)
+5. [docs/03_resultados_do_calculo.md](docs/03_resultados_do_calculo.md)
+6. [src/goell_q_solver.cpp](src/goell_q_solver.cpp)
 
 Se o objetivo for apenas localizar formulas ou conferir a implementacao:
 
-1. [docs/goell_01_field_expansions.md](docs/goell_01_field_expansions.md)
-2. [docs/goell_02_matrix_and_normalization.md](docs/goell_02_matrix_and_normalization.md)
+1. [docs/referencias/01_expansoes_de_campo.md](docs/referencias/01_expansoes_de_campo.md)
+2. [docs/referencias/02_matriz_global_e_normalizacao.md](docs/referencias/02_matriz_global_e_normalizacao.md)
 3. [src/goell_q_solver.cpp](src/goell_q_solver.cpp)
 
 ## Observacao Final
 
-Este README nao tenta mais carregar sozinho a traducao do artigo inteiro. Essa funcao agora foi distribuida entre os arquivos de `docs/`, onde a explicacao ficou mais organizada. O papel do README passou a ser o que ele faz melhor: servir como mapa geral do repositorio, do fluxo numerico e do estado da reproducao.
+Este README nao tenta mais carregar sozinho a traducao do artigo inteiro. Essa funcao agora foi distribuida entre os arquivos de `docs/`, com navegacao centralizada em [docs/README.md](docs/README.md). O papel do README passou a ser o que ele faz melhor: servir como mapa geral do repositorio, do fluxo numerico e do estado da reproducao.
