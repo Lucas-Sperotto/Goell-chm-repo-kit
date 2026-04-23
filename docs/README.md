@@ -34,6 +34,7 @@ Esta pasta concentra a traducao revisada do artigo de Goell, as notas permanente
 - [referencias/02_matriz_global_e_normalizacao.md](referencias/02_matriz_global_e_normalizacao.md): resumo dos blocos da matriz `Q`, determinante global e variaveis normalizadas.
 - [referencias/03_checklist_de_conferencia.md](referencias/03_checklist_de_conferencia.md): roteiro de revisao do PDF e dos pontos mais sensiveis da notacao.
 - [referencias/04_notas_sobre_a_tabela_1.md](referencias/04_notas_sobre_a_tabela_1.md): nota do repositorio sobre a reproducao numerica da Tabela I.
+- [referencias/05_plano_de_codificacao.md](referencias/05_plano_de_codificacao.md): plano de codificacao e criterios de aceite do pipeline atual.
 
 ## Convencao Da Pasta
 

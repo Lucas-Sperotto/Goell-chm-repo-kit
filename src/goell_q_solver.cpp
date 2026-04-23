@@ -56,6 +56,12 @@ enum class BoundaryGeometryMode
     intersection,
 };
 
+enum class EvenRectMatchingMode
+{
+    paper,
+    square_split,
+};
+
 enum class RowKind
 {
     ez_long,
@@ -82,14 +88,15 @@ struct Params
 
     HarmonicParity parity = HarmonicParity::odd;
     PhaseFamily phase = PhaseFamily::phi0;
-    BoundaryGeometryMode geometry_mode = BoundaryGeometryMode::literal;
+    BoundaryGeometryMode geometry_mode = BoundaryGeometryMode::intersection;
+    EvenRectMatchingMode even_rect_mode = EvenRectMatchingMode::paper;
 
     // "det" segue a eq. (19); "sv" e apenas um auxiliar numerico.
     string metric = "det";
     // Para metric=det:
     // - "minima" reproduz o fluxo exploratorio atual, baseado em vales de log|det|
     // - "sign" procura raizes por mudanca de sinal de det(Q), mais proximo da Sec. 2.7.1
-    string det_search = "minima";
+    string det_search = "sign";
 
     // Exporta todos os minimos locais refinados em cada B.
     // branch_id aqui e so o indice local do minimo em cada B.
@@ -391,7 +398,12 @@ static RowKind odd_z_row_kind(PhaseFamily phase)
     return (phase == PhaseFamily::phi0) ? RowKind::ez_long : RowKind::hz_long;
 }
 
-static double safe_positive(double x)
+static double clamp_nonnegative(double x)
+{
+    return (x < 0.0) ? 0.0 : x;
+}
+
+static double safe_denominator(double x)
 {
     return (x < EPS) ? EPS : x;
 }
@@ -443,13 +455,13 @@ static void fill_ez_columns(
         // Assim, os argumentos das funcoes especiais continuam corretos:
         //   h r_m = h_hat * r_hat
         //   p r_m = p_hat * r_hat
-        const double hr = safe_positive(h_scaled * bp.r);
-        const double pr = safe_positive(p_scaled * bp.r);
+        const double hr = h_scaled * bp.r;
+        const double pr = p_scaled * bp.r;
 
         const double J0 = Jn(n, hr);
         const double K0 = Kn(n, pr);
 
-        // Nas notas em docs/goell_02_matrix_and_normalization.md:
+        // Nas notas em docs/referencias/02_matriz_global_e_normalizacao.md:
         //   bar J' = J'_n(h r_m) / h
         //   bar K' = K'_n(p r_m) / p
         //   bar J  = n J_n(h r_m) / (h^2 r_m)
@@ -459,10 +471,10 @@ static void fill_ez_columns(
         // as expressoes abaixo. Fatores globais comuns sao absorvidos pelo
         // reescalonamento das linhas/colunas sem mover os zeros de det(Q).
         const double JprimeRaw = Jn_prime(n, hr);
-        const double JbarPrime = JprimeRaw / safe_positive(h_scaled);
-        const double KbarPrime = Kn_prime(n, pr) / safe_positive(p_scaled);
-        const double Jbar = (n == 0) ? 0.0 : (n * J0) / (safe_positive(h_scaled * h_scaled) * bp.r);
-        const double Kbar = (n == 0) ? 0.0 : (n * K0) / (safe_positive(p_scaled * p_scaled) * bp.r);
+        const double JbarPrime = JprimeRaw / safe_denominator(h_scaled);
+        const double KbarPrime = Kn_prime(n, pr) / safe_denominator(p_scaled);
+        const double Jbar = (n == 0) ? 0.0 : (n * J0) / (safe_denominator(h_scaled * h_scaled) * bp.r);
+        const double Kbar = (n == 0) ? 0.0 : (n * K0) / (safe_denominator(p_scaled * p_scaled) * bp.r);
 
         // Eqs. (7a), (7b), (7e), (7g), (7i), (7k)
         const double eLA = J0 * S;
@@ -473,10 +485,9 @@ static void fill_ez_columns(
 
         // Aqui trabalhamos com as linhas ja normalizadas por k0 e com Z0 fixado em 1,
         // exatamente como permitido pela observacao da p. 2144.
-        // A documentacao revisada do paper manteve em (7i) o termo J' sem barra.
-        // Por isso este bloco usa o derivado "cru" de J_n no argumento h r_m,
-        // enquanto os demais blocos tangenciais seguem as formas escaladas.
-        const double hTA = +eps_r * (Jbar * C * bp.R - JprimeRaw * S * bp.T);
+        // No bloco H^{TA}, o termo radial deve seguir a mesma forma escalada
+        // usada na formulacao compacta dos demais blocos tangenciais.
+        const double hTA = +eps_r * (Jbar * C * bp.R - JbarPrime * S * bp.T);
         const double hTC = -(Kbar * C * bp.R - KbarPrime * S * bp.T);
 
         const int colA = L.offset_A + i;
@@ -517,16 +528,16 @@ static void fill_hz_columns(
         const double S = S_term(n, bp.theta, P.phase);
         const double C = C_term(n, bp.theta, P.phase);
 
-        const double hr = safe_positive(h_scaled * bp.r);
-        const double pr = safe_positive(p_scaled * bp.r);
+        const double hr = h_scaled * bp.r;
+        const double pr = p_scaled * bp.r;
 
         const double J0 = Jn(n, hr);
         const double K0 = Kn(n, pr);
 
-        const double JbarPrime = Jn_prime(n, hr) / safe_positive(h_scaled);
-        const double KbarPrime = Kn_prime(n, pr) / safe_positive(p_scaled);
-        const double Jbar = (n == 0) ? 0.0 : (n * J0) / (safe_positive(h_scaled * h_scaled) * bp.r);
-        const double Kbar = (n == 0) ? 0.0 : (n * K0) / (safe_positive(p_scaled * p_scaled) * bp.r);
+        const double JbarPrime = Jn_prime(n, hr) / safe_denominator(h_scaled);
+        const double KbarPrime = Kn_prime(n, pr) / safe_denominator(p_scaled);
+        const double Jbar = (n == 0) ? 0.0 : (n * J0) / (safe_denominator(h_scaled * h_scaled) * bp.r);
+        const double Kbar = (n == 0) ? 0.0 : (n * K0) / (safe_denominator(p_scaled * p_scaled) * bp.r);
 
         // Eqs. (7c), (7d), (7f), (7h), (7j), (7l)
         const double hLB = J0 * C;
@@ -589,10 +600,9 @@ static MatrixXd assemble_Q(const Params &P, double B, double Pprime)
     const double eps_r = P.n_r * P.n_r;
     const double kz_over_k0 = sqrt(1.0 + (eps_r - 1.0) * Pprime);
 
-    const double Bsafe = safe_positive(B);
-    const double radial_scale = PI * Bsafe;
-    const double h_scaled = radial_scale * sqrt(safe_positive(1.0 - Pprime));
-    const double p_scaled = radial_scale * sqrt(safe_positive(Pprime));
+    const double radial_scale = PI * clamp_nonnegative(B);
+    const double h_scaled = radial_scale * sqrt(clamp_nonnegative(1.0 - Pprime));
+    const double p_scaled = radial_scale * sqrt(clamp_nonnegative(Pprime));
 
     MatrixXd Q;
 
@@ -640,7 +650,20 @@ static MatrixXd assemble_Q(const Params &P, double B, double Pprime)
             }
             else
             {
-                thetas = (kind == odd_z_row_kind(P.phase)) ? &theta_odd_rect : &theta_full;
+                if (P.even_rect_mode == EvenRectMatchingMode::paper)
+                {
+                    // Sec. 2.2 para a/b != 1:
+                    // todos seguem a primeira formula, exceto o componente-z impar,
+                    // que omite os dois pontos extremos.
+                    thetas = (kind == odd_z_row_kind(P.phase)) ? &theta_odd_rect : &theta_full;
+                }
+                else
+                {
+                    // Modo diagnostico: reaplica a mesma divisao do caso quadrado
+                    // para medir a sensibilidade do setor even a essa interpretacao.
+                    const bool use_even_points = uses_even_symmetry_points(kind, P.phase);
+                    thetas = use_even_points ? &theta_full : &theta_odd_square;
+                }
             }
 
             for (double theta : *thetas)
@@ -944,6 +967,15 @@ static BoundaryGeometryMode parse_geometry_mode(const string &value)
     throw runtime_error("geometry invalida; use literal ou intersection");
 }
 
+static EvenRectMatchingMode parse_even_rect_mode(const string &value)
+{
+    if (value == "paper")
+        return EvenRectMatchingMode::paper;
+    if (value == "square-split" || value == "square_split" || value == "square")
+        return EvenRectMatchingMode::square_split;
+    throw runtime_error("even-rect-mode invalido; use paper ou square-split");
+}
+
 static void parse_args(int argc, char **argv, Params &P)
 {
     for (int i = 1; i < argc; ++i)
@@ -1005,6 +1037,12 @@ static void parse_args(int argc, char **argv, Params &P)
             string value;
             next_string(value);
             P.geometry_mode = parse_geometry_mode(value);
+        }
+        else if (arg == "--even-rect-mode")
+        {
+            string value;
+            next_string(value);
+            P.even_rect_mode = parse_even_rect_mode(value);
         }
         else if (arg == "--all-minima")
             P.all_minima = true;

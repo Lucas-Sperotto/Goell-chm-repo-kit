@@ -1,21 +1,32 @@
 # TODO
 
-Pendencias tecnicas priorizadas depois do fechamento inicial da pasta `docs/`.
+Pendencias tecnicas priorizadas depois do fechamento inicial da pasta `docs/` e da primeira rodada de codificacao do pipeline de reproducao.
 
-## Alta prioridade
+## Concluido Nesta Fase
 
-- Revisar o bloco `H^{TA}` em `src/goell_q_solver.cpp` e conferir a forma escalada contra [docs/referencias/02_matriz_global_e_normalizacao.md](docs/referencias/02_matriz_global_e_normalizacao.md).
-- Separar a protecao numerica de `safe_positive()` da avaliacao fisica dos argumentos `hr` e `pr`.
-- Reexecutar a Tabela I apos esses dois ajustes e comparar o resultado com [docs/referencias/04_notas_sobre_a_tabela_1.md](docs/referencias/04_notas_sobre_a_tabela_1.md).
+- Revisado o bloco `H^{TA}` em `src/goell_q_solver.cpp`.
+- Separada a protecao numerica da avaliacao fisica dos argumentos `hr` e `pr`.
+- Reexecutada a Tabela I com selecao autonoma e thresholds objetivos.
+- Criado `run.sh` como interface publica de build, reproducao e validacao.
+- Estabilizado o pipeline das Figs. 16-19 com CSVs brutos, estaveis e rastreados.
+- Adicionado scaffold das Figs. 20-22 para os dois modos principais.
 
 ## Validacao modal
 
-- Estabilizar a identificacao do ramo fisico correto nas Figs. 16-19.
-- Revisar o setor `even`, que continua mais sensivel a selecao de pontos e de raiz.
-- Consolidar quando usar `n_r = 1.01` e quando usar `n_r = 1.0001`, evitando comparacoes cruzadas entre regimes diferentes.
+- Fechar a correspondencia fisica entre `principal_phi0` / `principal_phi90` e os rotulos `E^y_11` / `E^x_11`.
+- Comparar visualmente os PNGs finais das Figs. 16-22 contra o scan do artigo.
+- Manter `even-rect-mode=square-split` apenas como diagnostico do setor `even`.
 
-## Depois de estabilizar o nucleo
+## Proxima Fase: Campos
 
-- Voltar as Figs. 20-22.
+- Implementar calculo do vetor nulo da matriz `Q`.
+- Recuperar coeficientes modais a partir do vetor nulo.
+- Amostrar campos em grid para as Figs. 4-15.
+- Exportar CSVs de intensidade e componentes de campo.
+- Gerar mapas de intensidade em Python.
+- Planejar, depois dos mapas de intensidade, linhas de campo.
+
+## Pendencias Tecnicas De Fundo
+
 - Reavaliar a nota de reescalonamento da p. 2144 do paper.
-- Verificar se a reproducao da Tabela I pode deixar de escolher a raiz "mais proxima do paper" e passar a servir como validacao mais independente.
+- Registrar em documentacao permanente qualquer decisao nova sobre rotulagem modal.

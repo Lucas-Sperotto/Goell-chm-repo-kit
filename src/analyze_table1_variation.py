@@ -42,6 +42,7 @@ def run_case(
     pscan: int,
     geometry: str,
     det_search: str,
+    even_rect_mode: str,
     rescale: bool,
 ) -> list[tuple[float, float, str, str]]:
     candidates: list[tuple[float, float, str, str]] = []
@@ -73,6 +74,8 @@ def run_case(
                 "det",
                 "--det-search",
                 det_search,
+                "--even-rect-mode",
+                even_rect_mode,
                 "--all-minima",
             ]
             if not rescale:
@@ -96,6 +99,7 @@ def best_candidate(
     pscan: int,
     geometry: str,
     det_search: str,
+    even_rect_mode: str,
     rescale: bool,
 ) -> tuple[float, float, str, str]:
     candidates = run_case(
@@ -104,12 +108,19 @@ def best_candidate(
         pscan=pscan,
         geometry=geometry,
         det_search=det_search,
+        even_rect_mode=even_rect_mode,
         rescale=rescale,
     )
     return min(candidates, key=lambda item: abs(item[0] - expected))
 
 
-def variant_summary(geometry: str, det_search: str, rescale: bool, pscan: int) -> tuple[float, float, float]:
+def variant_summary(
+    geometry: str,
+    det_search: str,
+    even_rect_mode: str,
+    rescale: bool,
+    pscan: int,
+) -> tuple[float, float, float]:
     errors = []
     for a_over_b, column in TABLE1_EXPECTED.items():
         for N, expected in column.items():
@@ -120,6 +131,7 @@ def variant_summary(geometry: str, det_search: str, rescale: bool, pscan: int) -
                 pscan=pscan,
                 geometry=geometry,
                 det_search=det_search,
+                even_rect_mode=even_rect_mode,
                 rescale=rescale,
             )
             errors.append(pprime - expected)
@@ -136,24 +148,26 @@ def build_report() -> str:
     lines.append("")
     lines.append("## Variantes De Configuracao")
     lines.append("")
-    lines.append("| geometry | det-search | rescale | RMSE | MAE | pior erro |")
-    lines.append("|:--|:--|:--|--:|--:|--:|")
+    lines.append("| geometry | det-search | even-rect-mode | rescale | RMSE | MAE | pior erro |")
+    lines.append("|:--|:--|:--|:--|--:|--:|--:|")
 
     variants = [
-        ("intersection", "sign", False),
-        ("intersection", "minima", False),
-        ("literal", "sign", False),
-        ("intersection", "sign", True),
+        ("intersection", "sign", "paper", False),
+        ("intersection", "sign", "square-split", False),
+        ("intersection", "minima", "paper", False),
+        ("literal", "sign", "paper", False),
+        ("intersection", "sign", "paper", True),
     ]
-    for geometry, det_search, rescale in variants:
+    for geometry, det_search, even_rect_mode, rescale in variants:
         rmse, mae, worst = variant_summary(
             geometry=geometry,
             det_search=det_search,
+            even_rect_mode=even_rect_mode,
             rescale=rescale,
             pscan=240,
         )
         lines.append(
-            f"| {geometry} | {det_search} | {'on' if rescale else 'off'} | "
+            f"| {geometry} | {det_search} | {even_rect_mode} | {'on' if rescale else 'off'} | "
             f"{rmse:.6f} | {mae:.6f} | {worst:.6f} |"
         )
 
@@ -163,6 +177,7 @@ def build_report() -> str:
     lines.append("A melhor configuracao entre as testadas foi:")
     lines.append("- `geometry = intersection`")
     lines.append("- `det-search = sign`")
+    lines.append("- `even-rect-mode = paper`")
     lines.append("- `rescale = off` ou `on` quase nao muda o erro global")
     lines.append("")
     lines.append("## Classe Selecionada Em Cada Caso")
@@ -180,6 +195,7 @@ def build_report() -> str:
                 pscan=240,
                 geometry="intersection",
                 det_search="sign",
+                even_rect_mode="paper",
                 rescale=False,
             )
             lines.append(
@@ -203,6 +219,7 @@ def build_report() -> str:
                 pscan=pscan,
                 geometry="intersection",
                 det_search="sign",
+                even_rect_mode="paper",
                 rescale=False,
             )
             entries.append(f"{pprime:.6f} ({pprime-expected:+.6f}, {parity}/{phase})")
@@ -215,6 +232,7 @@ def build_report() -> str:
     lines.append("")
     lines.append("- `geometry = literal` piora muito a Tabela I; isso reforca que a leitura `intersection` da fronteira e a mais consistente numericamente.")
     lines.append("- Procurar raizes reais por mudanca de sinal (`det-search = sign`) e significativamente melhor do que buscar minimos de `log|det|`.")
+    lines.append("- No setor `even` com `a/b != 1`, a regra `paper` continua sendo a referencia; reaplicar a divisao do caso quadrado (`square-split`) serve apenas como diagnostico de sensibilidade.")
     lines.append("- Ligar ou desligar `rescale` quase nao muda o erro global quando usamos `det-search = sign`; entao a grande variacao restante nao parece vir do reescalonamento.")
     lines.append("- Nos piores casos, aumentar `Pscan` de 120 para 800 nao altera a raiz selecionada. Isso indica que a variacao restante nao e um problema de resolucao da varredura.")
     lines.append("- A classe selecionada muda com `N`, principalmente para `a/b = 3` e `a/b = 4`. Isso sugere competicao entre ramos proximos e identificacao modal instavel.")

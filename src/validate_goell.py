@@ -18,9 +18,12 @@ from __future__ import annotations
 import argparse
 import csv
 import io
+import math
 import subprocess
 from pathlib import Path
 from statistics import fmean
+
+from track_roots import filter_branches, load_points, track_branches, write_tracked_csv
 
 
 TABLE1_EXPECTED = {
@@ -29,6 +32,7 @@ TABLE1_EXPECTED = {
     3.0: {3: 0.820, 4: 0.820, 5: 0.819, 6: 0.822, 7: 0.820, 8: 0.820, 9: 0.823},
     4.0: {3: 0.828, 4: 0.819, 5: 0.813, 6: 0.820, 7: 0.813, 8: 0.814, 9: 0.815},
 }
+SOLVER_BIN = Path("build/goell_q_solver")
 
 CLASS_CASES = (
     ("odd", "phi0", "odd_phi0"),
@@ -60,10 +64,12 @@ def run_solver(
     pscan: int,
     metric: str,
     det_search: str,
+    even_rect_mode: str,
     rescale: bool,
 ) -> list[dict[str, str]]:
+    ensure_solver_exists()
     cmd = [
-        "./build/goell_q_solver",
+        str(SOLVER_BIN),
         "--parity",
         parity,
         "--phase",
@@ -88,6 +94,8 @@ def run_solver(
         metric,
         "--det-search",
         det_search,
+        "--even-rect-mode",
+        even_rect_mode,
         "--dump-scan",
         str(B),
     ]
@@ -112,10 +120,12 @@ def run_curve_solver(
     pscan: int,
     metric: str,
     det_search: str,
+    even_rect_mode: str,
     rescale: bool,
 ) -> list[dict[str, str]]:
+    ensure_solver_exists()
     cmd = [
-        "./build/goell_q_solver",
+        str(SOLVER_BIN),
         "--parity",
         parity,
         "--phase",
@@ -140,6 +150,8 @@ def run_curve_solver(
         metric,
         "--det-search",
         det_search,
+        "--even-rect-mode",
+        even_rect_mode,
         "--all-minima",
     ]
     if not rescale:
@@ -147,6 +159,14 @@ def run_curve_solver(
 
     out = subprocess.check_output(cmd, text=True)
     return list(csv.DictReader(io.StringIO(out)))
+
+
+def ensure_solver_exists() -> None:
+    if SOLVER_BIN.exists():
+        return
+    raise SystemExit(
+        "build/goell_q_solver nao encontrado. Rode ./run.sh build ou compile o solver antes."
+    )
 
 
 def parse_n_values(raw: str) -> list[int]:
@@ -207,8 +227,13 @@ def export_stable_figure(
     pscan: int,
     metric: str,
     det_search: str,
+    even_rect_mode: str,
     geometry: str,
     rescale: bool,
+    tracked_max_jump: float,
+    tracked_min_length: int,
+    tracked_monotonic_tol: float,
+    tracked_min_monotonic_fraction: float,
 ) -> list[Path]:
     if tag not in FIGURE_DEFAULTS:
         raise SystemExit(f"Figura desconhecida para estabilidade: {tag}")
@@ -221,7 +246,7 @@ def export_stable_figure(
     print(
         f"Filtro de estabilidade para {tag}: "
         f"a/b={cfg['a_over_b']}, n_r={cfg['nr']}, Ns={n_values}, "
-        f"support>={min_support}, p_tol={p_tol:.3f}"
+        f"support>={min_support}, p_tol={p_tol:.3f}, even-rect-mode={even_rect_mode}"
     )
 
     for parity, phase, suffix in CLASS_CASES:
@@ -240,6 +265,7 @@ def export_stable_figure(
                 pscan=pscan,
                 metric=metric,
                 det_search=det_search,
+                even_rect_mode=even_rect_mode,
                 rescale=rescale,
             )
             curves_by_n[N] = normalize_curve_rows(raw_rows)
@@ -303,6 +329,14 @@ def export_stable_figure(
             writer.writerows(stable_rows)
 
         exported.append(out_path)
+        tracked_path = track_stable_csv(
+            out_path,
+            max_jump=tracked_max_jump,
+            min_length=tracked_min_length,
+            monotonic_tol=tracked_monotonic_tol,
+            min_monotonic_fraction=tracked_min_monotonic_fraction,
+        )
+        exported.append(tracked_path)
 
         if stable_rows:
             bmin = min(float(row["B"]) for row in stable_rows)
@@ -315,9 +349,148 @@ def export_stable_figure(
             )
         else:
             print(f"  {out_path.name}: sem clusters estaveis")
+        print(f"  {tracked_path.name}: rastreado por continuidade em B")
 
     print()
     return exported
+
+
+def track_stable_csv(
+    path: Path,
+    *,
+    max_jump: float,
+    min_length: int,
+    monotonic_tol: float,
+    min_monotonic_fraction: float,
+) -> Path:
+    by_B = load_points(path)
+    branches = track_branches(by_B, max_jump=max_jump)
+    kept = filter_branches(
+        branches,
+        min_length=min_length,
+        monotonic_tol=monotonic_tol,
+        min_monotonic_fraction=min_monotonic_fraction,
+    )
+    tracked_path = path.with_name(f"{path.stem}_tracked.csv")
+    write_tracked_csv(tracked_path, kept)
+    return tracked_path
+
+
+def summarize_curve_path(path: Path) -> str:
+    if not path.exists():
+        return f"- `{path.name}`: arquivo ausente"
+
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+
+    if not rows:
+        return f"- `{path.name}`: vazio"
+
+    values = []
+    branch_ids = set()
+    for row in rows:
+        try:
+            B = float(row["B"])
+            Pprime = float(row["Pprime"])
+        except (KeyError, ValueError):
+            continue
+        if not math.isfinite(Pprime):
+            continue
+        values.append((B, Pprime))
+        branch_id = row.get("branch_id", "").strip()
+        if branch_id:
+            branch_ids.add(branch_id)
+
+    if not values:
+        return f"- `{path.name}`: sem pontos finitos"
+
+    bmin = min(B for B, _ in values)
+    bmax = max(B for B, _ in values)
+    pmin = min(P for _, P in values)
+    pmax = max(P for _, P in values)
+    return (
+        f"- `{path.name}`: pontos={len(values)}, ramos={len(branch_ids)}, "
+        f"B=[{bmin:.3f},{bmax:.3f}], P'=[{pmin:.3f},{pmax:.3f}]"
+    )
+
+
+def write_figure_report(
+    *,
+    tag: str,
+    n_values: list[int],
+    min_support: int,
+    p_tol: float,
+    det_search: str,
+    even_rect_mode: str,
+) -> Path:
+    out_dir = Path("out")
+    report_path = out_dir / f"{tag}_validation_summary.md"
+    raw_paths = [out_dir / f"{tag}_{suffix}.csv" for _, _, suffix in CLASS_CASES]
+    stable_paths = [out_dir / f"{tag}_stable_{suffix}.csv" for _, _, suffix in CLASS_CASES]
+    tracked_paths = [out_dir / f"{tag}_stable_{suffix}_tracked.csv" for _, _, suffix in CLASS_CASES]
+
+    lines = []
+    lines.append(f"# Resumo De Validacao - {tag}")
+    lines.append("")
+    lines.append("Configuracao de estabilidade:")
+    lines.append(f"- `det-search = {det_search}`")
+    lines.append(f"- `even-rect-mode = {even_rect_mode}`")
+    lines.append(f"- `n_values = {','.join(str(N) for N in n_values)}`")
+    lines.append(f"- `min_support = {min_support}`")
+    lines.append(f"- `p_tol = {p_tol:.3f}`")
+    qualitative = qualitative_notes(tag)
+    if qualitative:
+        lines.append("")
+        lines.append("## Leitura Qualitativa Esperada")
+        lines.append("")
+        for note in qualitative:
+            lines.append(f"- {note}")
+    lines.append("")
+    lines.append("## CSVs Brutos")
+    lines.append("")
+    for path in raw_paths:
+        lines.append(summarize_curve_path(path))
+    lines.append("")
+    lines.append("## CSVs Estaveis")
+    lines.append("")
+    for path in stable_paths:
+        lines.append(summarize_curve_path(path))
+    lines.append("")
+    lines.append("## CSVs Rastreado")
+    lines.append("")
+    for path in tracked_paths:
+        lines.append(summarize_curve_path(path))
+    lines.append("")
+    lines.append("Observacao:")
+    lines.append(
+        "- Os CSVs `stable` agrupam raizes por suporte em `N`; os CSVs `tracked` aplicam continuidade em `B` sobre esses agrupamentos."
+    )
+    report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"Relatorio: {report_path}")
+    return report_path
+
+
+def qualitative_notes(tag: str) -> list[str]:
+    notes = {
+        "fig16": [
+            "Caso quadrado de baixo contraste: espera-se degenerescencia entre pares `E^y_mn` e `E^x_mn`.",
+            "Os ramos `odd/phi0` e `odd/phi90` principais devem permanecer praticamente sobrepostos.",
+        ],
+        "fig17": [
+            "Com `a/b = 2`, as degenerescencias geometricas devem se quebrar, exceto a dualidade `E^x_mn` / `E^y_mn` no limite de baixo contraste.",
+            "A leitura modal final ainda depende da correspondencia fisica dos ramos, especialmente nos cruzamentos.",
+        ],
+        "fig18": [
+            "Indice finito com razao de aspecto unitaria: espera-se levantamento parcial das degenerescencias.",
+            "Modos cujas linhas de campo revertem ao atravessar a origem tendem a se separar mais claramente.",
+        ],
+        "fig19": [
+            "Indice finito e `a/b = 2`: espera-se levantamento mais forte das degenerescencias.",
+            "Este e o caso mais exigente para validar continuidade de ramos e rotulagem modal.",
+        ],
+    }
+    return notes.get(tag, [])
 
 
 def local_minima(rows: list[dict[str, str]]) -> list[tuple[float, float]]:
@@ -351,6 +524,7 @@ def compare_table1(pscan: int) -> None:
                         pscan=pscan,
                         metric="det",
                         det_search="minima",
+                        even_rect_mode="paper",
                         rescale=False,
                     )
                     for p, m in local_minima(rows):
@@ -457,9 +631,45 @@ def main() -> None:
     )
     parser.add_argument(
         "--det-search",
-        default="minima",
+        default="sign",
         choices=("minima", "sign"),
         help="Modo de extracao usado quando metric=det: minima ou sign.",
+    )
+    parser.add_argument(
+        "--even-rect-mode",
+        default="paper",
+        choices=("paper", "square-split"),
+        help="Regra usada no caso even com a/b != 1.",
+    )
+    parser.add_argument(
+        "--report-figures",
+        nargs="*",
+        default=[],
+        help="Escreve resumos em Markdown para uma ou mais figuras.",
+    )
+    parser.add_argument(
+        "--tracked-max-jump",
+        type=float,
+        default=0.12,
+        help="Salto maximo em P' para costurar os CSVs estaveis ao longo de B.",
+    )
+    parser.add_argument(
+        "--tracked-min-length",
+        type=int,
+        default=6,
+        help="Numero minimo de pontos para manter um ramo rastreado.",
+    )
+    parser.add_argument(
+        "--tracked-monotonic-tol",
+        type=float,
+        default=0.02,
+        help="Tolerancia de monotonicidade usada no rastreamento.",
+    )
+    parser.add_argument(
+        "--tracked-min-monotonic-fraction",
+        type=float,
+        default=0.85,
+        help="Fracao minima de passos monotonicamente crescentes no rastreamento.",
     )
     args = parser.parse_args()
 
@@ -480,8 +690,25 @@ def main() -> None:
                 pscan=args.stability_pscan,
                 metric="det",
                 det_search=args.det_search,
+                even_rect_mode=args.even_rect_mode,
                 geometry="intersection",
                 rescale=False,
+                tracked_max_jump=args.tracked_max_jump,
+                tracked_min_length=args.tracked_min_length,
+                tracked_monotonic_tol=args.tracked_monotonic_tol,
+                tracked_min_monotonic_fraction=args.tracked_min_monotonic_fraction,
+            )
+
+    if args.report_figures:
+        n_values = parse_n_values(args.n_values)
+        for tag in args.report_figures:
+            write_figure_report(
+                tag=tag,
+                n_values=n_values,
+                min_support=args.min_support,
+                p_tol=args.p_tol,
+                det_search=args.det_search,
+                even_rect_mode=args.even_rect_mode,
             )
 
 

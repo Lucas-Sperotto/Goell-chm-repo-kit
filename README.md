@@ -29,13 +29,16 @@ Este repositorio foi montado justamente para tornar esse caminho legivel, verifi
 
 ### Codigo
 
+- [run.sh](run.sh): interface publica oficial para build, Tabela I, Figs. 16-19, validacao e rodada completa.
 - [src/goell_q_solver.cpp](src/goell_q_solver.cpp): solver principal, com montagem da matriz `Q`, busca de raizes e exportacao das curvas.
-- [src/presets.sh](src/presets.sh): execucoes padrao para figuras e rodadas de validacao.
+- [src/presets.sh](src/presets.sh): shim de compatibilidade para encaminhar chamadas antigas ao `run.sh`.
 - [src/plot_compare.py](src/plot_compare.py): plotador dos CSVs produzidos pelo solver.
 - [src/reproduce_table1.py](src/reproduce_table1.py): reproducao automatizada da Tabela I.
 - [src/analyze_table1_variation.py](src/analyze_table1_variation.py): diagnostico das fontes de variacao residual da Tabela I.
-- [src/validate_goell.py](src/validate_goell.py): utilitarios de validacao por estabilidade em `N`.
+- [src/validate_goell.py](src/validate_goell.py): exportacao e validacao por estabilidade em `N`, com relatorios e CSVs rastreados por continuidade em `B`.
 - [src/track_roots.py](src/track_roots.py): rastreamento de ramos por continuidade.
+- [src/principal_modes.py](src/principal_modes.py): seletor do ramo principal a partir dos CSVs rastreados.
+- [src/sweep_principal_modes.py](src/sweep_principal_modes.py): sweep dos dois modos principais para abrir o caminho das Figs. 20-22.
 
 ### Documentacao
 
@@ -68,7 +71,7 @@ Pendencias do projeto:
 
 ## Estado Atual Da Implementacao
 
-O solver foi reorganizado para refletir a classificacao correta do artigo:
+O solver e o pipeline de reproducao foram reorganizados para refletir a classificacao correta do artigo:
 
 - paridade dos harmonicos: `odd` e `even`;
 - familia de fase: `phi0` e `phi90`.
@@ -82,23 +85,34 @@ Isso gera as quatro classes modais tratadas explicitamente no codigo:
 
 Tambem ja existe suporte a duas variantes importantes de busca:
 
-- busca por minimos de uma metrica escalar;
-- busca por mudanca de sinal de `det(Q)`, mais proxima do procedimento descrito no paper.
+- busca por mudanca de sinal de `det(Q)`, que agora e o modo canonico de reproducao;
+- busca por minimos de uma metrica escalar, mantida como diagnostico.
+
+No fluxo atual:
+
+- `run.sh` compila automaticamente `build/goell_q_solver` quando necessario;
+- a Tabela I usa selecao autonoma do primeiro ramo fisico, sem depender do atalho "nearest paper root";
+- as Figs. 16-19 passam por exportacao bruta, filtragem por estabilidade em `N={5,7,9}` e rastreamento por continuidade em `B`;
+- o caso `even` com `a/b != 1` usa por padrao a regra de matching descrita no paper, mas aceita uma variante diagnostica `square-split`;
+- as Figs. 20-22 agora usam um pipeline separado para os dois modos principais, selecionados como os ramos `odd/phi0` e `odd/phi90` de menor cutoff apos estabilidade em `N`;
+- os artefatos finais ficam separados entre `out/` e `figures/`.
 
 ## O Que Ja Esta Bem Encaminhado
 
 - a estrutura em quatro classes modais;
 - a montagem geral da matriz `Q`;
 - a interpretacao da fronteira por intersecao geometrica;
-- a reproducao automatizada da Tabela I;
-- o fluxo de geracao das figuras principais;
+- a reproducao automatizada da Tabela I com meta numerica objetiva;
+- o fluxo publico `sh -> C++ -> Python` para as Figs. 16-19;
+- a exportacao de CSVs brutos, estaveis e rastreados;
 - a documentacao das equacoes e da narrativa fisica do artigo.
 
 ## O Que Ainda Esta Em Aberto
 
-- identificacao robusta do ramo fisico correto quando ha varias raizes proximas;
 - tratamento fino do setor `even`, que continua mais sensivel;
-- alinhamento visual e modal das Figs. 16-22 com o artigo;
+- refinamento da identificacao modal final e da leitura fisica das curvas das Figs. 16-19;
+- extensao do mesmo pipeline para as Figs. 20-22;
+- implementacao futura dos mapas de campo das Figs. 4-15;
 - interpretacao final da nota de reescalonamento da p. 2144.
 
 Em outras palavras: o repositorio ja esta num ponto em que a dificuldade principal nao e mais "montar alguma versao do metodo", e sim "fazer a reproducao numerica convergir para os mesmos ramos do artigo".
@@ -112,7 +126,13 @@ Dependencias principais:
 - Python 3
 - `matplotlib`
 
-Compilacao manual:
+Compilacao recomendada:
+
+```bash
+./run.sh build
+```
+
+Compilacao manual, se precisar depurar o ambiente:
 
 ```bash
 mkdir -p build
@@ -121,28 +141,58 @@ g++ -O3 -std=c++17 src/goell_q_solver.cpp -I /usr/include/eigen3 -o build/goell_
 
 ## Como Rodar
 
-Exemplos com os presets principais:
+Fluxo publico principal:
 
 ```bash
-bash src/presets.sh fig16
-bash src/presets.sh fig17
-bash src/presets.sh fig18
-bash src/presets.sh fig19
+./run.sh table1
+./run.sh fig16
+./run.sh fig17
+./run.sh fig18
+./run.sh fig19
+./run.sh fig20
+./run.sh fig21
+./run.sh fig22
+./run.sh validate
+./run.sh all-core
+./run.sh all-curves
 ```
 
-Os CSVs sao escritos em `out/` e as figuras em `figures/`.
+`src/presets.sh` continua existindo apenas como compatibilidade para chamadas antigas.
+
+Os CSVs sao escritos em `out/` e as figuras em `figures/`. Para cada figura principal, o fluxo atual produz:
+
+- 4 CSVs brutos por classe modal;
+- 4 CSVs estaveis filtrados por consistencia em `N`;
+- 4 CSVs rastreados por continuidade em `B`;
+- 1 figura de depuracao por classe;
+- 1 figura final com as curvas selecionadas;
+- 1 resumo Markdown de validacao.
+
+Para os sweeps dos modos principais das Figs. 20-22, o fluxo atual produz:
+
+- CSVs estaveis e rastreados para `odd/phi0` e `odd/phi90` em cada valor do parametro varrido;
+- um CSV agregado `out/<tag>_principal_modes.csv`;
+- uma figura agregada `figures/<tag>_principal_modes.png`;
+- um resumo Markdown `out/<tag>_principal_modes.md`.
 
 Tambem e possivel sobrescrever parametros por variaveis de ambiente:
 
 ```bash
-N=7 NB=80 PSCAN=320 bash src/presets.sh fig17
-OUT_PREFIX=fig16_det METRIC=det DET_SEARCH=sign bash src/presets.sh fig16
-GEOMETRY=intersection NR=1.0001 bash src/presets.sh fig17
+RAW_N=7 RAW_NB=80 STABLE_PSCAN=320 ./run.sh fig17
+RAW_METRIC=det RAW_DET_SEARCH=sign ./run.sh fig16
+FIG_NR=1.0001 FIG_A_OVER_B=2 ./run.sh fig17
+TABLE1_MODE=nearest-paper ./run.sh table1
+EVEN_RECT_MODE=square-split ./run.sh fig17
+FIG20_NR_VALUES=1.0001,1.01,1.1,1.5 ./run.sh fig20
+FIG22_ASPECT_VALUES=1,2,4,8 ./run.sh fig22
+SWEEP_REUSE_EXISTING=1 ./run.sh fig22
 ```
+
+`SWEEP_REUSE_EXISTING=1` e util para retomar sweeps longos das Figs. 20-22 sem recalcular valores que ja tenham CSV principal exportado.
 
 ## Colunas Exportadas Pelo Solver
 
-Os CSVs produzidos pelo solver usam, em geral:
+O esquema bruto canonico usa:
 
 - `branch_id`
 - `B`
@@ -152,7 +202,12 @@ Os CSVs produzidos pelo solver usam, em geral:
 - `phase`
 - `geometry`
 
-Observacao importante: no estado atual do projeto, `branch_id` ainda nao equivale automaticamente a uma identificacao modal fisica final como a do artigo. Ele deve ser lido como identificador local da raiz ou do candidato exportado.
+Os CSVs estaveis adicionam:
+
+- `support`
+- `n_values`
+
+Observacao importante: no estado atual do projeto, `branch_id` ainda nao equivale automaticamente a uma identificacao modal fisica final como a do artigo. Ele deve ser lido como identificador local do candidato exportado ou do ramo rastreado.
 
 ## Validacao
 
@@ -162,7 +217,14 @@ Hoje, os testes de validacao mais importantes do repositorio sao:
 - comparacao qualitativa e quantitativa das Figs. 16-19;
 - exploracao dos efeitos de `\Delta n_r` e da razao de aspecto para as Figs. 20-22.
 
-A Tabela I tem sido especialmente util porque ela testa a convergencia em funcao do numero de harmonicos, isto e, testa o proprio coracao numerico do metodo.
+A Tabela I tem sido especialmente util porque ela testa a convergencia em funcao do numero de harmonicos, isto e, testa o proprio coracao numerico do metodo. O alvo operacional atual e:
+
+- `MAE <= 0.01`
+- erro absoluto maximo `<= 0.02`
+
+Esses limites ja sao checados diretamente por `./run.sh validate`.
+
+Para rodar todas as curvas de propagacao ja implementadas, use `./run.sh all-curves`. Esse comando cobre Figs. 16-22 e pode ser mais demorado que `validate`.
 
 ## Como Ler O Projeto
 

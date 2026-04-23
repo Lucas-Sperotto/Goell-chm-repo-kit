@@ -34,24 +34,30 @@ Este documento reúne as convenções do repositório e o roteiro de evolução 
 
 - Recompilar o solver quando houver mudanca em `src/goell_q_solver.cpp`.
 - Executar `python3 -m py_compile` nos scripts Python alterados.
-- Se a mudanca for numerica, rerodar ao menos o fluxo mais proximo do trecho afetado, como `src/presets.sh`, `src/reproduce_table1.py` ou `src/validate_goell.py`.
+- Se a mudanca for numerica, rerodar ao menos o fluxo mais proximo do trecho afetado, preferencialmente via `./run.sh`, `src/reproduce_table1.py` ou `src/validate_goell.py`.
 
 ## Mapa artigo -> codigo
 
 | Parte do artigo | Arquivos principais |
 | --- | --- |
 | Secao II - formulacao teorica | `src/goell_q_solver.cpp`, `docs/02_derivacao_das_equacoes.md`, `docs/02.1_efeitos_da_simetria.md` a `docs/02.7_metodo_de_computacao.md` |
-| Secao III - resultados | `src/presets.sh`, `src/plot_compare.py`, `docs/03_resultados_do_calculo.md`, `docs/03.1_precisao.md`, `docs/03.2_configuracoes_modais.md`, `docs/03.3_curvas_de_propagacao.md` |
+| Secao III - resultados | `run.sh`, `src/plot_compare.py`, `src/validate_goell.py`, `docs/03_resultados_do_calculo.md`, `docs/03.1_precisao.md`, `docs/03.2_configuracoes_modais.md`, `docs/03.3_curvas_de_propagacao.md` |
 | Tabela I | `src/reproduce_table1.py`, `src/analyze_table1_variation.py`, `docs/referencias/04_notas_sobre_a_tabela_1.md` |
+| Modos principais e Figs. 20-22 | `src/principal_modes.py`, `src/sweep_principal_modes.py`, `run.sh`, `docs/03.3_curvas_de_propagacao.md` |
 | Conferencia de notacao e OCR | `docs/referencias/03_checklist_de_conferencia.md` |
 
 ## Comandos uteis
 
 ```bash
-mkdir -p build
-g++ -O3 -std=c++17 src/goell_q_solver.cpp -I /usr/include/eigen3 -o build/goell_q_solver
-bash src/presets.sh fig16 --rebuild
-python3 src/reproduce_table1.py
+./run.sh build
+./run.sh table1
+./run.sh fig16
+./run.sh fig17
+./run.sh fig20
+./run.sh fig22
+./run.sh all-curves
+SWEEP_REUSE_EXISTING=1 ./run.sh fig22
+./run.sh validate
 python3 src/analyze_table1_variation.py
 python3 src/validate_goell.py --stability-figures fig16 fig17 --det-search sign
 ```
@@ -60,10 +66,21 @@ python3 src/validate_goell.py --stability-figures fig16 fig17 --det-search sign
 
 A sequencia recomendada de proximas contribuicoes, em ordem de prioridade, continua sendo a que esta consolidada em [TODO.md](TODO.md):
 
-1. Revisar `H^{TA}` e o uso de `safe_positive()` nos argumentos fisicos.
-2. Rerodar a Tabela I apos esses ajustes.
-3. Estabilizar a identificacao modal das Figs. 16-19.
-4. So depois atacar as Figs. 20-22 e a nota de reescalonamento da p. 2144.
+1. Consolidar a leitura fisica e a identificacao modal final das curvas exportadas nas Figs. 16-19.
+2. Refinar a rotulagem fisica dos modos principais nas Figs. 20-22.
+3. Implementar a etapa de campos das Figs. 4-15 com calculo em `C++` e plotagem via CSV em Python.
+4. Resolver a nota de reescalonamento da p. 2144 sem perder rastreabilidade com o paper.
+
+## Avancos recentes
+
+- `run.sh` virou a interface publica oficial do repositorio.
+- O modo canonico de reproducao passou a ser busca por mudanca de sinal de `det(Q)`.
+- O bloco `H^{TA}` e a separacao entre protecao numerica e avaliacao fisica foram revisados no solver.
+- A regra do caso `even` com `a/b != 1` agora esta travada explicitamente como `paper`, com `square-split` mantido apenas para diagnostico.
+- A Tabela I agora roda em modo autonomo e com criterio numerico objetivo de aceite.
+- As Figs. 16-19 ja possuem pipeline de CSV bruto, CSV estavel, CSV rastreado e figura final.
+- As Figs. 20-22 ja possuem sweep dos modos principais, com retomada opcional via `SWEEP_REUSE_EXISTING=1`.
+- O repositório agora tambem seleciona e exporta os dois modos principais em sweeps parametricos, preparando a reproducao das Figs. 20-22.
 
 ## O que não fazer cedo demais
 

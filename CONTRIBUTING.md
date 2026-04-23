@@ -28,8 +28,10 @@ O objetivo do projeto e reproduzir, com clareza, rastreabilidade e fidelidade, o
 - `TODO.md`: backlog tecnico consolidado.
 - `docs/`: traducao principal do artigo.
 - `docs/referencias/`: notas auxiliares permanentes do repositorio.
+- `run.sh`: interface publica para build, reproducao e validacao.
 - `src/goell_q_solver.cpp`: solver principal.
-- `src/*.py` e `src/presets.sh`: utilitarios de reproducao, validacao e plotagem.
+- `src/*.py`: utilitarios de reproducao, validacao e plotagem.
+- `src/presets.sh`: shim de compatibilidade para o fluxo antigo.
 - `build/`, `out/` e `figures/`: artefatos gerados localmente.
 
 ## Estilo de edicao
@@ -43,10 +45,12 @@ O objetivo do projeto e reproduzir, com clareza, rastreabilidade e fidelidade, o
 Os comandos principais do fluxo atual sao:
 
 ```bash
-mkdir -p build
-g++ -O3 -std=c++17 src/goell_q_solver.cpp -I /usr/include/eigen3 -o build/goell_q_solver
-bash src/presets.sh fig16 --rebuild
-python3 -m py_compile src/plot_compare.py src/reproduce_table1.py src/analyze_table1_variation.py src/validate_goell.py src/track_roots.py
+./run.sh build
+./run.sh table1
+./run.sh fig16
+./run.sh fig20
+./run.sh validate
+python3 -m py_compile src/plot_compare.py src/reproduce_table1.py src/analyze_table1_variation.py src/validate_goell.py src/track_roots.py src/principal_modes.py src/sweep_principal_modes.py
 ```
 
 Se a sua mudanca mexer na camada numerica ou nos scripts, rode ao menos o build e a verificacao mais proxima do trecho afetado.
