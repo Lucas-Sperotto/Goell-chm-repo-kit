@@ -39,6 +39,7 @@ Esta pasta concentra a traducao revisada do artigo de Goell, as notas permanente
 - [referencias/03_checklist_de_conferencia.md](referencias/03_checklist_de_conferencia.md): roteiro de revisao do PDF e dos pontos mais sensiveis da notacao.
 - [referencias/04_notas_sobre_a_tabela_1.md](referencias/04_notas_sobre_a_tabela_1.md): nota do repositorio sobre a reproducao numerica da Tabela I.
 - [referencias/05_plano_de_codificacao.md](referencias/05_plano_de_codificacao.md): plano de codificacao e criterios de aceite do pipeline atual.
+- [referencias/06_metodos_busca_raiz.md](referencias/06_metodos_busca_raiz.md): nota sobre a divergência entre o método de Newton citado no artigo (§2.7.1, p. 2144) e os métodos implementados (bissecção, falsa posição, secante, Newton-DF, Brent); inclui equações dos Algoritmos 2.1–2.5, comparação prática de P' encontrado por cada método e justificativa do padrão atual (Brent).
 - A infraestrutura de campos agora vive no solver modular (`include/goell/field.hpp`, `src/core/field.cpp`) e o utilitario de plotagem correspondente e `scripts/field_map.py`.
 
 ## Convencao Da Pasta

@@ -6,6 +6,7 @@
 /figures/
 /figures/**
 .codex
+out/.mplconfig/
 *.o
 *.obj
 *.exe

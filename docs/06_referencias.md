@@ -2,10 +2,10 @@
 
 _Navegacao: [README geral](../README.md) | [Indice de docs](README.md) | [Anterior: 5. Agradecimentos](05_agradecimentos.md)_
 
-1. Miller, S. E., “Integrated Optics: An introduction,” this issue, pp. 2059–2069.
+1. Miller, S. E., “Integrated Optics: An introduction,” this issue, pp. 2059–2069. <https://doi.org/10.1002/j.1538-7305.1969.tb01165.x>
 2. Kapany, N. S., **Fiber Optics**, New York: Academic Press, 1967, pp. 36–80.
 3. Bracey, M. F., Cullen, A. L., Gillespie, E. F. F., and Staniforth, J. A., “Surface Wave Research in Sheffield,” **I.R.E. Trans. Antennas and Propagation**, AP-7, No. 10 (December 1959), pp. 219–225.
-4. Snitzer, E., “Cylindrical Dielectric Waveguide Modes,” **J. Opt. Soc. of Amer.**, 51, No. 5 (May 1961), pp. 491–498.
+4. Snitzer, E., “Cylindrical Dielectric Waveguide Modes,” **J. Opt. Soc. of Amer.**, 51, No. 5 (May 1961), pp. 491–498. <https://doi.org/10.1364/JOSA.51.000491>
 5. Snitzer, E., and Osterberg, H., “Observed Dielectric Waveguide Modes in the Visible Spectrum,” **J. Opt. Soc. of Amer.**, 51, No. 5 (May 1961), pp. 491–505.
 6. Marcatili, E. A. J., “Dielectric Rectangular Waveguide and Directional Coupler for Integrated Optics,” this issue, pp. 2071–2102.
 7. Schlosser, W., and Unger, H. G., “Partially Filled Waveguides and Surface Waveguides of Rectangular Cross-Section,” **Advances in Microwaves**, New York: Academic Press, 1966, pp. 319–387.

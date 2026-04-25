@@ -100,28 +100,35 @@ No fluxo atual:
 - o solver tambem exporta grades 2D de campo via `--field-map`, e `scripts/field_map.py` gera paineis para `Ez`, `Hz`, `|E_t|`, `|H_t|` e direcoes transversais;
 - os artefatos finais ficam separados entre `out/` e `figures/`.
 
-## O Que Ja Esta Bem Encaminhado
+## O Que Esta Funcionando
 
-- a estrutura em quatro classes modais;
-- a montagem geral da matriz `Q`;
-- a interpretacao da fronteira por intersecao geometrica;
-- a reproducao automatizada da Tabela I com meta numerica objetiva;
-- o fluxo publico `sh -> C++ -> Python` para as Figs. 16-19;
-- o sweep dos modos principais para as Figs. 20-22;
-- a exportacao exploratoria de mapas de campo em grade 2D;
-- a exportacao de CSVs brutos, estaveis e rastreados;
-- a documentacao das equacoes e da narrativa fisica do artigo.
+| Componente | Estado |
+| --- | --- |
+| Build e smoke test C++ | ✅ |
+| Validacao das funcoes de Bessel (70/70 PASS) | ✅ |
+| Tabela I (MAE ≈ 0,0006, alvo ≤ 0,01) | ✅ |
+| Pipeline completo Figs. 16-19 (bruto → estavel → rastreado → figura) | ✅ |
+| Sweep de modos principais Figs. 20-22 | ✅ |
+| Mapa de campo 2D com todos os componentes (Ez, Hz, Et, Ht) | ✅ |
+| Comentarios fisicos e referencias a equacoes no codigo C++ | ✅ |
+| Traducao completa do artigo em `docs/` | ✅ |
 
 ## O Que Ainda Esta Em Aberto
 
-- tratamento fino do setor `even`, que continua mais sensivel;
-- refinamento da identificacao modal final e da leitura fisica das curvas das Figs. 16-19;
-- rotulagem fisica final dos modos principais nas Figs. 20-22;
-- validacao cientifica dos mapas de campo contra as Figs. 4-15 do artigo;
-- definicao dos presets canonicos e da narrativa fisica final para os mapas de campo;
-- interpretacao final da nota de reescalonamento da p. 2144.
+Consulte [TODO.md](TODO.md) para o backlog detalhado. Em resumo:
 
-Em outras palavras: o repositorio ja passou da fase "montar alguma versao do metodo". Hoje ele esta pronto para estudo, manutencao, reproducao automatizada da Tabela I, curvas das Figs. 16-22 e exportacao exploratoria de campos. O que ainda nao esta fechado e a validacao cientifica final de todos os ramos e mapas do artigo.
+- **Validacao dos mapas de campo** (Figs. 4-15): a infraestrutura esta pronta,
+  mas nenhum mapa foi comparado painel a painel com as figuras publicadas.
+- **Correspondencia modal formal**: a tabela `odd/phi0 → E^y_11` etc. nao esta
+  documentada em nenhum arquivo canonico do repositorio.
+- **Nota da p. 2144** (reescalonamento de Q): a escolha `--no-rescale` como
+  padrao nunca foi fundamentada por escrito.
+- **Setor `even` com a/b != 1**: mais sensivel numericamente; a variante
+  `square-split` nao foi avaliada sistematicamente.
+
+O repositorio esta pronto para estudo, manutencao e reproducao das Figs. 16-22.
+O que falta para o fechamento cientifico completo e a validacao sistematica dos
+mapas de campo e a documentacao da correspondencia modal.
 
 ## Como Compilar
 
@@ -157,19 +164,50 @@ g++ -O3 -std=c++17 src/main.cpp src/core/*.cpp -Iinclude -I/usr/include/eigen3 -
 Fluxo publico principal:
 
 ```bash
-./run.sh table1
-./run.sh fig16
-./run.sh fig17
-./run.sh fig18
-./run.sh fig19
-./run.sh fig20
-./run.sh fig21
-./run.sh fig22
-./run.sh validate
-./run.sh all-core
-./run.sh all-curves
-python3 scripts/field_map.py --parity odd --phase phi0 --a_over_b 1 --nr 1.5 --N 5 --field-B 2.5 --field-P 0.65 --field-nx 80 --field-ny 80 --field-margin 1.4 --output figures/field_HE11.png
+./run.sh table1       # Reproduce Tabela I; exporta CSV, Markdown e PNG
+./run.sh fig16        # Figs. 16: a/b=1, Delta n_r → 0
+./run.sh fig17        # Fig. 17: a/b=2, Delta n_r → 0
+./run.sh fig18        # Fig. 18: a/b=1, Delta n_r = 0.5
+./run.sh fig19        # Fig. 19: a/b=2, Delta n_r = 0.5
+./run.sh fig20        # Fig. 20: sweep de modos principais por n_r (a/b=1)
+./run.sh fig21        # Fig. 21: sweep de modos principais por n_r (a/b=2)
+./run.sh fig22        # Fig. 22: sweep de modos principais por a/b
+./run.sh validate     # Tabela I + estabilidade Figs. 16-17 (criterio numerico)
+./run.sh all-core     # table1 + fig16..19 + validate
+./run.sh all-curves   # fig16..22
 ```
+
+### Mapa de campo 2D
+
+O solver exporta todos os componentes de campo em uma grade 2D com a flag `--field-map`.
+O script `scripts/field_map.py` le esse CSV e gera seis paineis:
+
+| Painel | Campo | O que observar |
+| --- | --- | --- |
+| $E_z$ | Longitudinal eletrico | Padrão de nos e ventres; simetria do modo |
+| $H_z$ | Longitudinal magnetico | Ortogonal a $E_z$ em modos hibridos |
+| $\|E_t\|$ | Modulo do transversal eletrico | Concentracao de energia eletrica |
+| $\|H_t\|$ | Modulo do transversal magnetico | Concentracao de energia magnetica |
+| $E_t$ (setas) | Direcao de $(E_x, E_y)$ | Linhas de campo eletrico transversal |
+| $H_t$ (setas) | Direcao de $(H_x, H_y)$ | Linhas de campo magnetico transversal |
+
+O contorno tracejado branco marca a fronteira do nucleo. Os campos sao normalizados pelo
+pico global de $|E_z|$ ou $|H_z|$ — modos bem confinados concentram o pico no interior;
+modos proximos do cutoff ($\mathcal{P}'^2 \to 0$) mostram campos dominantes no exterior.
+
+Exemplo — modo fundamental HE$_{11}$ ($n_r = 1.5$, $a/b = 1$, $\mathcal{B} = 2.5$,
+$\mathcal{P}'^2 \approx 0.77$):
+
+```bash
+python3 scripts/field_map.py \
+    --parity odd --phase phi0 --a_over_b 1 --nr 1.5 \
+    --N 5 --field-B 2.5 --field-P 0.769 \
+    --field-nx 80 --field-ny 80 --field-margin 1.4 \
+    --output figures/field_HE11.png
+```
+
+Os parametros `--field-B` e `--field-P` devem ser obtidos primeiro rodando o pipeline
+de curvas de propagacao (ex. `./run.sh fig18`) e lendo o valor de `Pprime` no CSV.
 
 `src/presets.sh` continua existindo apenas como compatibilidade para chamadas antigas.
 

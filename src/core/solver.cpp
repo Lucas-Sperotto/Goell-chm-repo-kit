@@ -125,7 +125,222 @@ std::vector<Sample> edge_minima(const std::vector<Sample> &samples)
     return mins;
 }
 
-// Localiza raízes de det(Q) = 0 por detecção de mudança de sinal + bissecção.
+// ═══════════════════════════════════════════════════════════════════════════
+// MÉTODOS DE BUSCA DE RAIZ — refinamento após detecção de mudança de sinal
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Todos os métodos abaixo recebem um intervalo [a, b] onde det(Q) muda de
+// sinal e retornam uma estimativa refinada da raiz.
+//
+// Referência didática: Prof. Lucas Kriesel Sperotto, Cálculo Numérico (2014),
+//   Algoritmos 2.1 (Bissecção), 2.4 (Secante), 2.5 (Falsa Posição).
+//   Newton-DF adapta o Algoritmo 2.3 com derivada por diferenças finitas.
+//   Brent (1973) combina os três anteriores com convergência garantida.
+//
+// Divergência do artigo (§2.7, p. 2144):
+//   Goell afirma usar o "método de Newton" para refinar raízes.  Newton exige
+//   f'(P'), a derivada de det(Q) em relação a P' — não disponível de forma
+//   analítica.  A alternativa sem derivadas mais próxima do espírito do artigo
+//   é o método de Brent, adotado aqui como padrão.
+//   Veja docs/referencias/06_metodos_busca_raiz.md para a discussão completa.
+
+namespace
+{
+
+// Avalia sign(det(Q)) * |det(Q)|^(1/scale) no ponto (B, P'), com escala
+// logarítmica para evitar overflow.  O resultado tem o mesmo sinal que det(Q)
+// e magnitude suficiente para interpolações lineares estáveis.
+double signed_det(const Params &P, double B, double Pprime)
+{
+    const auto info = determinant_value(P, B, Pprime);
+    // Limita logabs a [-300, 30] para evitar underflow/overflow em exp().
+    const double l = std::min(30.0, std::max(-300.0, info.logabs));
+    return static_cast<double>(info.sign) * std::exp(l);
+}
+
+// ── ALGORITMO 2.1 — Bissecção ──────────────────────────────────────────────
+//
+// Divide o intervalo [a, b] ao meio e mantém o sub-intervalo onde o sinal
+// muda.  Convergência garantida em O(log₂((b-a)/ε)) iterações.
+// Taxa de convergência: linear (redução de 50% por iteração).
+static double refine_bisect(const Params &P, double B,
+                             double a, double b, int max_iter = 50)
+{
+    int sa = determinant_value(P, B, a).sign;
+    for (int it = 0; it < max_iter; ++it)
+    {
+        const double mid = 0.5 * (a + b);
+        const auto   info = determinant_value(P, B, mid);
+        if (info.sign == 0) return mid;           // zero exato
+        if (sa != 0 && sa != info.sign) b = mid;  // zero está em [a, mid]
+        else { a = mid; sa = info.sign; }         // zero está em [mid, b]
+    }
+    return 0.5 * (a + b);
+}
+
+// ── ALGORITMO 2.5 — Falsa Posição (Regula Falsi) ──────────────────────────
+//
+// Usa interpolação linear entre f(a) e f(b) para estimar a raiz:
+//   p = b − f(b)·(b−a) / (f(b)−f(a))
+// Mantém o bracket: atualiza a ou b conforme o sinal de f(p).
+// Convergência superlinear em funções monótonas; pode ser lento se f
+// é muito curva (converge para um extremo fixo).
+static double refine_falsepos(const Params &P, double B,
+                               double a, double b, int max_iter = 50)
+{
+    double fa = signed_det(P, B, a);
+    double fb = signed_det(P, B, b);
+    double p  = b;
+    for (int it = 0; it < max_iter; ++it)
+    {
+        if (std::fabs(fb - fa) < 1e-18) break;
+        p = b - fb * (b - a) / (fb - fa);
+        p = std::min(1.0 - 1e-6, std::max(1e-6, p));
+        const double fp = signed_det(P, B, p);
+        if (std::fabs(fp) < 1e-14) break;        // convergiu
+        if (fa * fp < 0.0) { b = p; fb = fp; }
+        else               { a = p; fa = fp; }
+    }
+    return p;
+}
+
+// ── ALGORITMO 2.4 — Secante ───────────────────────────────────────────────
+//
+// Usa dois iterados consecutivos para interpolar sem manter bracket:
+//   p = p₁ − f(p₁)·(p₁−p₀) / (f(p₁)−f(p₀))
+// Convergência superlinear (ordem ≈ 1.618); pode divergir se chute ruim.
+// Inicializado com os extremos do bracket para máxima segurança.
+static double refine_secant(const Params &P, double B,
+                             double p0, double p1, int max_iter = 50)
+{
+    double f0 = signed_det(P, B, p0);
+    double f1 = signed_det(P, B, p1);
+    for (int it = 0; it < max_iter; ++it)
+    {
+        if (std::fabs(f1 - f0) < 1e-18) break;
+        const double p = p1 - f1 * (p1 - p0) / (f1 - f0);
+        const double pc = std::min(1.0 - 1e-6, std::max(1e-6, p));
+        if (std::fabs(pc - p1) < 1e-12) return pc;
+        p0 = p1; f0 = f1;
+        p1 = pc; f1 = signed_det(P, B, pc);
+    }
+    return p1;
+}
+
+// ── ALGORITMO 2.3 com Diferenças Finitas — Newton-DF ──────────────────────
+//
+// Aproxima f'(x) por diferença central: f'(x) ≈ (f(x+h)−f(x−h)) / (2h)
+// e aplica a iteração de Newton: x ← x − f(x)/f'(x).
+// Convergência quadrática perto da raiz; pode divergir longe dela.
+// Requer 3 avaliações de det(Q) por iteração (vs. 1 para bissecção).
+// Inicia no ponto médio do bracket para máxima estabilidade inicial.
+static double refine_newton(const Params &P, double B,
+                             double a, double b, int max_iter = 50)
+{
+    const double h = 1e-7; // passo para diferença central
+    double x = 0.5 * (a + b);
+    for (int it = 0; it < max_iter; ++it)
+    {
+        const double fp      = signed_det(P, B, x);
+        const double fp_plus = signed_det(P, B, x + h);
+        const double fp_minus= signed_det(P, B, x - h);
+        const double deriv   = (fp_plus - fp_minus) / (2.0 * h);
+        if (std::fabs(deriv) < 1e-18) break;
+        const double x_new = std::min(1.0 - 1e-6, std::max(1e-6, x - fp / deriv));
+        if (std::fabs(x_new - x) < 1e-12) return x_new;
+        x = x_new;
+    }
+    return x;
+}
+
+// ── Método de Brent (1973) ─────────────────────────────────────────────────
+//
+// Combina bissecção, secante e interpolação quadrática inversa (IQI):
+//   - Usa IQI ou secante quando a interpolação cai dentro do intervalo seguro.
+//   - Recorre à bissecção se a interpolação é arriscada (critérios de Brent).
+//
+// Garante: (a) bracket mantido em todo momento → convergência garantida;
+//          (b) convergência superlinear quando a função é comportada.
+//
+// É o método que melhor captura o espírito do artigo ("método de Newton"
+// sem exigir a derivada analítica) e é o padrão atual do solver.
+static double refine_brent(const Params &P, double B,
+                            double a, double b, int max_iter = 50)
+{
+    double fa = signed_det(P, B, a);
+    double fb = signed_det(P, B, b);
+    if (fa * fb > 0.0) return 0.5 * (a + b); // sem mudança de sinal: usa centro
+
+    // Garante |f(a)| ≥ |f(b)| (b é sempre o melhor candidato à raiz).
+    if (std::fabs(fa) < std::fabs(fb)) { std::swap(a, b); std::swap(fa, fb); }
+
+    double c = a, fc = fa;  // c: iterado anterior; d: iterado antes de c
+    double d = a;
+    bool mflag = true;      // indica se a última iteração usou bissecção
+
+    for (int it = 0; it < max_iter; ++it)
+    {
+        if (std::fabs(fb) < 1e-14 || std::fabs(b - a) < 1e-14) break;
+
+        double s;
+        if (fa != fc && fb != fc)
+        {
+            // Interpolação quadrática inversa (IQI) — usa três pontos a, b, c.
+            s = (a*fb*fc) / ((fa-fb)*(fa-fc))
+              + (b*fa*fc) / ((fb-fa)*(fb-fc))
+              + (c*fa*fb) / ((fc-fa)*(fc-fb));
+        }
+        else
+        {
+            // Secante — usa dois pontos a, b.
+            s = b - fb * (b - a) / (fb - fa);
+        }
+
+        // Critérios de Brent: se algum falhar, recorre à bissecção.
+        const double lo = std::min((3.0*a + b) / 4.0, b);
+        const double hi = std::max((3.0*a + b) / 4.0, b);
+        const bool cond1 = !(lo < s && s < hi);
+        const bool cond2 = mflag  && std::fabs(s - b) >= std::fabs(b - c) / 2.0;
+        const bool cond3 = !mflag && std::fabs(s - b) >= std::fabs(c - d) / 2.0;
+        const bool cond4 = mflag  && std::fabs(b - c) < 1e-14;
+        const bool cond5 = !mflag && std::fabs(c - d) < 1e-14;
+
+        if (cond1 || cond2 || cond3 || cond4 || cond5)
+        {
+            s = 0.5 * (a + b); // bissecção
+            mflag = true;
+        }
+        else
+        {
+            mflag = false;
+        }
+
+        s = std::min(1.0 - 1e-6, std::max(1e-6, s));
+        const double fs = signed_det(P, B, s);
+
+        d = c; c = b; fc = fb;           // desloca histórico
+        if (fa * fs < 0.0) { b = s; fb = fs; }
+        else               { a = s; fa = fs; }
+
+        // Mantém b como o melhor candidato.
+        if (std::fabs(fa) < std::fabs(fb)) { std::swap(a, b); std::swap(fa, fb); }
+    }
+    return b;
+}
+
+// Despachante: chama o refinador configurado em P.det_refine.
+static double refine_root(const Params &P, double B, double a, double b)
+{
+    if      (P.det_refine == "bisect")   return refine_bisect  (P, B, a, b);
+    else if (P.det_refine == "falsepos") return refine_falsepos(P, B, a, b);
+    else if (P.det_refine == "secant")   return refine_secant  (P, B, a, b);
+    else if (P.det_refine == "newton")   return refine_newton  (P, B, a, b);
+    else                                  return refine_brent   (P, B, a, b); // padrão
+}
+
+} // namespace (anon)
+
+// Localiza raízes de det(Q) = 0 por detecção de mudança de sinal + refinamento.
 //
 // Algoritmo:
 //   Para cada par consecutivo (left, right) na varredura DetSample:
@@ -166,39 +381,8 @@ std::vector<Sample> sign_change_roots(const Params &P, double B, const std::vect
         if (left.sign != 0 && right.sign != 0 && left.sign != right.sign)
         {
             // Mudança de sinal detectada: det(Q) cruza zero entre left e right.
-            // Bissecção para refinar a posição da raiz.
-            double a = left.Pprime,  b = right.Pprime;
-            int    sa = left.sign,   sb = right.sign;
-
-            for (int it = 0; it < 50; ++it)
-            {
-                const double mid       = 0.5 * (a + b);
-                const auto   info_mid  = determinant_value(P, B, mid);
-
-                if (info_mid.sign == 0) // zero exato no meio
-                {
-                    a = b = mid;
-                    break;
-                }
-
-                // Mantém o sub-intervalo onde o sinal ainda muda.
-                if (sa != 0 && sa != info_mid.sign)
-                {
-                    b  = mid;
-                    sb = info_mid.sign;
-                }
-                else if (sb != 0 && sb != info_mid.sign)
-                {
-                    a  = mid;
-                    sa = info_mid.sign;
-                }
-                else
-                {
-                    break; // sinal intermediário = 0 ou inconsistente
-                }
-            }
-
-            append_unique(0.5 * (a + b));
+            // Refina a raiz com o método configurado em P.det_refine.
+            append_unique(refine_root(P, B, left.Pprime, right.Pprime));
         }
     }
 

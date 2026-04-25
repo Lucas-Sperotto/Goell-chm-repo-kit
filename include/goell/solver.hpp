@@ -7,11 +7,22 @@
  * chamada de "curva de propagação" ou "curva de dispersão" (§3.3).
  *
  * Estratégias de busca de raízes (Params::det_search):
- *   "sign"   — detecção por mudança de sinal de det(Q) com bissecção (padrão)
+ *   "sign"   — detecção por mudança de sinal de det(Q) + refinamento (padrão)
  *   "minima" — busca de mínimos locais de ln|det(Q)| com refinamento parabólico
  *
+ * Métodos de refinamento pós-detecção de sinal (Params::det_refine):
+ *   "bisect"   — bissecção (Algoritmo 2.1): divide o intervalo ao meio
+ *   "falsepos" — falsa posição (Algoritmo 2.5): interpolação linear com bracket
+ *   "secant"   — secante (Algoritmo 2.4): interpolação sem bracket garantido
+ *   "newton"   — Newton com diferenças finitas (Algoritmo 2.3 adaptado)
+ *   "brent"    — Brent (1973): IQI + secante + bissecção adaptativa (padrão)
+ *
+ * Divergência com o artigo: Goell (§2.7.1, p. 2144) cita o "método de Newton".
+ * Adotamos Brent como padrão: sem derivada analítica, convergência garantida.
+ * Veja docs/referencias/06_metodos_busca_raiz.md para a discussão completa.
+ *
  * Referência: docs/02.7_metodo_de_computacao.md  docs/03.3_curvas_de_propagacao.md
- *             docs/simbolos.md §"Parâmetros do CLI".
+ *             docs/referencias/06_metodos_busca_raiz.md.
  */
 
 #ifndef GOELL_SOLVER_HPP

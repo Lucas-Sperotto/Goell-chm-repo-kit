@@ -288,10 +288,17 @@ A classificação EH/HE no guia dielétrico retangular é análoga à usada em g
 | `--Pscan` | Amostras de $\mathcal{P}^2$ por $B$ | `160` | `P.Pscan` |
 | `--metric det\|sv` | Métrica para detecção de raízes | `det` | `P.metric` |
 | `--det-search sign\|minima` | Estratégia de busca | `sign` | `P.det_search` |
+| `--det-refine bisect\|falsepos\|secant\|newton\|brent` | Método de refinamento de raiz após detecção de sinal | `brent` | `P.det_refine` |
 | `--no-rescale` | Desativa reescalonamento de linhas/colunas | — | `P.rescale_matrix = false` |
 | `--null-vector` | Calcula vetor nulo via SVD em cada raiz | — | `P.null_vector` |
 | `--test-bessel` | Exporta tabela de $J_n$, $K_n$ e derivadas | — | `P.test_bessel` |
 | `--dump-scan B` | Exporta varredura de $\mathcal{P}^2$ para um único $B$ | — | `P.dump_scan`, `P.dump_B` |
+| `--field-map` | Ativa modo de mapa de campo 2D (substitui saída padrão) | — | `P.field_map` |
+| `--field-B` | Valor de $\mathcal{B}$ para o mapa de campo | `1.0` | `P.field_B` |
+| `--field-P` | Valor de $\mathcal{P}'^2$ para o mapa de campo | `0.5` | `P.field_Pprime` |
+| `--field-nx` | Número de pontos da grade em $x$ | `60` | `P.field_nx` |
+| `--field-ny` | Número de pontos da grade em $y$ | `60` | `P.field_ny` |
+| `--field-margin` | Extensão da grade em múltiplos da semi-dimensão do núcleo | `1.5` | `P.field_margin` |
 
 ---
 
@@ -309,6 +316,58 @@ A classificação EH/HE no guia dielétrico retangular é análoga à usada em g
 | `Ez_frac` | float | $f_{Ez}$ (apenas com `--null-vector`) |
 | `Hz_frac` | float | $f_{Hz}$ (apenas com `--null-vector`) |
 | `mode_class` | string | `EH`, `HE` ou `hybrid` (apenas com `--null-vector`) |
+
+---
+
+## 17. Colunas do CSV de Mapa de Campo (`--field-map`)
+
+Cada linha representa um ponto $(x, y)$ da grade 2D, com coordenadas normalizadas por $b$.
+O núcleo ocupa $|x| \leq a/(2b)$, $|y| \leq 0{,}5$.
+
+| Coluna | Descrição |
+| -------- | ----------- |
+| `x` | Coordenada $x/b$ (normalizada pela semi-dimensão $b$) |
+| `y` | Coordenada $y/b$ |
+| `inside` | `1` se o ponto está dentro do núcleo, `0` se está no exterior |
+| `Ez` | Componente longitudinal elétrica $E_z$ (normalizada — ver abaixo) |
+| `Hz` | Componente longitudinal magnética $H_z$ (normalizada) |
+| `Er` | Componente radial elétrica $E_r$ |
+| `Etheta` | Componente azimutal elétrica $E_\theta$ |
+| `Hr` | Componente radial magnética $H_r$ |
+| `Htheta` | Componente azimutal magnética $H_\theta$ |
+| `Ex` | Componente cartesiana $E_x = E_r \cos\theta - E_\theta \sin\theta$ |
+| `Ey` | Componente cartesiana $E_y = E_r \sin\theta + E_\theta \cos\theta$ |
+| `Hx` | Componente cartesiana $H_x$ |
+| `Hy` | Componente cartesiana $H_y$ |
+
+**Normalização:** todos os campos são divididos pelo pico global de $|E_z|$ ou $|H_z|$
+em toda a grade (interior + exterior). Para modos bem confinados, esse pico coincide
+com o interior do núcleo. Para modos próximos do cutoff ($\mathcal{P}'^2 \to 0$),
+$K_n(pr)$ para harmônicos altos domina no exterior; a normalização global garante
+saída limitada em $[-1, 1]$ e colorbar significativa em ambos os casos.
+
+**Fase:** os campos longitudinais ($E_z$, $H_z$) são avaliados na fase $\omega t = 0$
+(componente real da onda). Os campos transversais ($E_r$, $E_\theta$, $H_r$, $H_\theta$)
+são avaliados na fase $\omega t = \pi/2$, quando as componentes transversais são reais
+e os campos longitudinais são nulos — as duas snapshots mostram padrões ortogonais e
+complementares do mesmo modo.
+
+---
+
+## 18. Painéis do Mapa de Campo (`scripts/field_map.py`)
+
+O script gera seis painéis em uma única figura:
+
+| Painel | Campo mostrado | O que observar |
+| -------- | --------------- | --------------- |
+| $E_z$ (longitudinal) | Mapa de cor RdBu de $E_z$ | Padrão de nós e ventres; simetria do modo |
+| $H_z$ (longitudinal) | Mapa de cor RdBu de $H_z$ | Ortogonal a $E_z$ para modos híbridos |
+| $\|E_t\|$ (transversal elét.) | Mapa de cor inferno de $\sqrt{E_x^2+E_y^2}$ | Concentração de energia elétrica |
+| $\|H_t\|$ (transversal mag.) | Mapa de cor inferno de $\sqrt{H_x^2+H_y^2}$ | Concentração de energia magnética |
+| $E_t$ (direção) | Setas normalizadas de $(E_x, E_y)$ | Linhas de campo elétrico transversal |
+| $H_t$ (direção) | Setas normalizadas de $(H_x, H_y)$ | Linhas de campo magnético transversal |
+
+O contorno tracejado branco indica a fronteira do núcleo ($a \times b$).
 
 ---
 

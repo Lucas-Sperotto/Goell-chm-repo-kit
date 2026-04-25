@@ -72,24 +72,23 @@ python3 scripts/field_map.py --parity odd --phase phi0 --a_over_b 1 --nr 1.5 --N
 
 ## Roteiro de evolucao
 
-A sequencia recomendada de proximas contribuicoes, em ordem de prioridade, continua sendo a que esta consolidada em [TODO.md](TODO.md):
+As proximas contribuicoes prioritarias estao detalhadas em [TODO.md](TODO.md). Em ordem:
 
-1. Consolidar a leitura fisica e a identificacao modal final das curvas exportadas nas Figs. 16-19.
-2. Refinar a rotulagem fisica dos modos principais nas Figs. 20-22.
-3. Validar os mapas de campo exportados contra as Figs. 4-15 e fechar presets canonicos para esses casos.
-4. Resolver a nota de reescalonamento da p. 2144 sem perder rastreabilidade com o paper.
+1. Validar mapas de campo contra as Figs. 4-15 e registrar presets canonicos.
+2. Formalizar a correspondencia entre `odd/phi0` / `odd/phi90` e os rotulos $E^y_{mn}$ / $E^x_{mn}$.
+3. Documentar a decisao sobre `--no-rescale` com referencia a p. 2144 do artigo.
+4. Integrar `field_map.py` como subcomando de `run.sh` com presets.
+5. Avaliar e fechar o setor `even` com `a/b != 1` (comparar `paper` vs `square-split`).
 
-## Avancos recentes
+## Estado atual (resumo rapido)
 
-- `run.sh` virou a interface publica oficial do repositorio.
-- O modo canonico de reproducao passou a ser busca por mudanca de sinal de `det(Q)`.
-- O bloco `H^{TA}` e a separacao entre protecao numerica e avaliacao fisica foram revisados no solver.
-- A regra do caso `even` com `a/b != 1` agora esta travada explicitamente como `paper`, com `square-split` mantido apenas para diagnostico.
-- A Tabela I agora roda em modo autonomo e com criterio numerico objetivo de aceite.
-- As Figs. 16-19 ja possuem pipeline de CSV bruto, CSV estavel, CSV rastreado e figura final.
-- As Figs. 20-22 ja possuem sweep dos modos principais, com retomada opcional via `SWEEP_REUSE_EXISTING=1`.
-- O repositório agora tambem seleciona e exporta os dois modos principais em sweeps parametricos, preparando a reproducao das Figs. 20-22.
-- O solver agora tambem exporta grades de campo 2D por `--field-map`, com plotagem desacoplada em `scripts/field_map.py`.
+- `run.sh` e a interface publica; `scripts/run.sh` e a implementacao interna.
+- Busca por mudanca de sinal de `det(Q)` e o modo canonico (flag `--det-search sign`).
+- Tabela I: MAE ≈ 0,0006, Bessel 70/70, ambos verificados por `./run.sh validate`.
+- Figs. 16-19: pipeline completo (bruto → estavel → rastreado → figura).
+- Figs. 20-22: sweep parametrico de modos principais com retomada via `SWEEP_REUSE_EXISTING=1`.
+- Mapas de campo: infraestrutura completa (`--field-map` no solver, `scripts/field_map.py`
+  para plotagem); smoke-test visual correto para modo confinado e modo de cutoff.
 
 ## O que não fazer cedo demais
 

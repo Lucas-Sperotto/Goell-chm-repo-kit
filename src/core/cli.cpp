@@ -123,6 +123,10 @@ void parse_args(int argc, char **argv, Params &P)
             next_string(value);
             P.det_search = parse_det_search_mode(value);
         }
+        // Método de refinamento de raiz após detecção de mudança de sinal.
+        // Valores válidos: bisect | falsepos | secant | newton | brent (padrão).
+        // Veja docs/referencias/06_metodos_busca_raiz.md para a comparação.
+        else if (arg == "--det-refine") next_string(P.det_refine);
 
         // ── Família de modos ──────────────────────────────��──────────────
         else if (arg == "--parity")

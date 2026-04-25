@@ -121,6 +121,10 @@ struct Params
     EvenRectMatchingMode even_rect_mode = EvenRectMatchingMode::paper;
     std::string          metric         = "det";   // "det" ou "sv" (valor singular)
     std::string          det_search     = "sign";  // "sign" (mudança de sinal) ou "minima"
+    // Método de refinamento de raiz usado na busca "sign" (§2.7, p. 2144).
+    // O artigo cita "método de Newton"; usamos Brent por padrão (sem derivada,
+    // convergência garantida).  Veja docs/referencias/06_metodos_busca_raiz.md.
+    std::string          det_refine     = "brent"; // bisect|falsepos|secant|newton|brent
     bool all_minima       = true;   // exportar todos os modos por valor de B
     bool allow_edge_minima = false; // incluir mínimos nas bordas de P'
     bool rescale_matrix   = true;   // normalizar linhas e colunas de Q antes do cálculo
